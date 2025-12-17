@@ -1,0 +1,42 @@
+{
+  "name": "opticsthemebuilder",
+  "version": "1.0.0",
+  "description": "Generate accessible color palettes with automatic foreground color selection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "optics": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "color",
+    "palette",
+    "theme",
+    "design-system",
+    "accessibility",
+    "wcag",
+    "contrast",
+    "figma",
+    "optics",
+    "light-dark",
+    "dark-mode",
+    "theme-switching",
+    "css-variables"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^14.0.2",
+    "culori": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
