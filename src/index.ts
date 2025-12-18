@@ -10,10 +10,7 @@ export {
 } from './contrast';
 export { 
   exportToFigma, 
-  exportToJSON, 
-  exportToCSS, 
-  exportToTailwind,
-  exportToDesignTokens,
+  exportContrastReport,
   exportAll,
   saveToFile 
 } from './exporter';
@@ -21,12 +18,20 @@ export {
 // Optics scale generator and exporters
 export { generateOpticsPalette } from './optics-generator';
 export {
-  exportOpticsToCSS,
-  exportOpticsToJSON,
-  exportOpticsToDesignTokens,
   exportOpticsToFigma,
-  exportOpticsToTailwind,
-  exportOpticsAll
+  exportOpticsContrastReport,
+  exportOpticsAll,
+  saveOpticsToFile
 } from './optics-exporter';
+
+// Shared color utilities
+export {
+  parseColor,
+  toHSLColor,
+  toRGBColor,
+  createHsl,
+  hslToRgb,
+  rgbToHsl
+} from './color-utils';
 
 export * from './types';

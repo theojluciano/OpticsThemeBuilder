@@ -1,4 +1,4 @@
-import { ColorPalette, FigmaVariable } from './types';
+import { ColorPalette } from './types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -91,114 +91,98 @@ export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): an
 }
 
 /**
- * Export palette to standard JSON format
+ * Generate a contrast report for standard (non-Optics) palettes
  */
-export function exportToJSON(palette: ColorPalette): string {
-  return JSON.stringify(palette, null, 2);
-}
-
-/**
- * Export palette to CSS custom properties
- */
-export function exportToCSS(palette: ColorPalette): string {
-  let css = `:root {\n`;
-  css += `  /* ${palette.name} - Generated from ${palette.baseColor.hex} */\n\n`;
+export function exportContrastReport(palette: ColorPalette): string {
+  let report = `# WCAG Contrast Report\n`;
+  report += `# Palette: ${palette.name}\n`;
+  report += `# Base Color: ${palette.baseColor.hex}\n`;
+  report += `# Total Stops: ${palette.stops.length}\n\n`;
+  report += `${"=".repeat(80)}\n\n`;
   
-  palette.stops.forEach((stop) => {
-    css += `  /* Stop ${stop.stop} - ${stop.background.hex} */\n`;
-    css += `  --${palette.name}-${stop.stop}: ${stop.background.hex};\n`;
-    css += `  --${palette.name}-${stop.stop}-rgb: ${Math.round(stop.background.rgb.r * 255)}, ${Math.round(stop.background.rgb.g * 255)}, ${Math.round(stop.background.rgb.b * 255)};\n`;
-    css += `  --${palette.name}-${stop.stop}-hsl: ${Math.round(stop.background.hsl.h)}, ${Math.round(stop.background.hsl.s * 100)}%, ${Math.round(stop.background.hsl.l * 100)}%;\n`;
-    css += `  --${palette.name}-${stop.stop}-fg-light: ${stop.foregrounds.light.hex};\n`;
-    css += `  --${palette.name}-${stop.stop}-fg-dark: ${stop.foregrounds.dark.hex};\n`;
-    css += `  --${palette.name}-${stop.stop}-fg: ${stop.recommendedForeground === 'light' ? stop.foregrounds.light.hex : stop.foregrounds.dark.hex};\n`;
-    css += `\n`;
+  // Collect failures
+  const failures: Array<{stop: number; bg: string; fg: string; fgType: string; ratio: number}> = [];
+  
+  palette.stops.forEach(stop => {
+    if (stop.foregrounds.light.contrast < 4.5) {
+      failures.push({
+        stop: stop.stop,
+        bg: stop.background.hex,
+        fg: stop.foregrounds.light.hex,
+        fgType: 'light',
+        ratio: stop.foregrounds.light.contrast
+      });
+    }
+    if (stop.foregrounds.dark.contrast < 4.5) {
+      failures.push({
+        stop: stop.stop,
+        bg: stop.background.hex,
+        fg: stop.foregrounds.dark.hex,
+        fgType: 'dark',
+        ratio: stop.foregrounds.dark.contrast
+      });
+    }
   });
   
-  css += `}\n`;
-  return css;
-}
-
-/**
- * Export palette to Tailwind CSS configuration
- */
-export function exportToTailwind(palette: ColorPalette): string {
-  let config = `// Tailwind color configuration for ${palette.name}\n`;
-  config += `// Add this to your tailwind.config.js colors object\n\n`;
-  config += `'${palette.name}': {\n`;
+  // Failures summary
+  report += `## ⚠️  FAILURES SUMMARY\n\n`;
   
-  palette.stops.forEach((stop) => {
-    config += `  ${stop.stop}: '${stop.background.hex}',\n`;
-  });
-  
-  config += `},\n`;
-  return config;
-}
-
-/**
- * Export palette to W3C Design Tokens format
- * This is compatible with many design token tools and plugins
- */
-export function exportToDesignTokens(palette: ColorPalette): any {
-  const tokens: any = {
-    [palette.name]: {
-      $type: 'color',
-      $description: `Color palette generated from ${palette.baseColor.hex}`,
-    },
-  };
-  
-  // Add background colors
-  palette.stops.forEach((stop) => {
-    tokens[palette.name][stop.stop] = {
-      $value: stop.background.hex,
-      $type: 'color',
-      $description: `Background color - Stop ${stop.stop}`,
-      $extensions: {
-        'com.opticsthemebuilder': {
-          hsl: `hsl(${Math.round(stop.background.hsl.h)}, ${Math.round(stop.background.hsl.s * 100)}%, ${Math.round(stop.background.hsl.l * 100)}%)`,
-          rgb: `rgb(${Math.round(stop.background.rgb.r * 255)}, ${Math.round(stop.background.rgb.g * 255)}, ${Math.round(stop.background.rgb.b * 255)})`,
-          recommendedForeground: stop.recommendedForeground,
-          lightContrast: stop.foregrounds.light.contrast.toFixed(2),
-          darkContrast: stop.foregrounds.dark.contrast.toFixed(2),
-          wcagAA: stop.foregrounds[stop.recommendedForeground].wcagAA,
-          wcagAAA: stop.foregrounds[stop.recommendedForeground].wcagAAA,
-        },
-      },
-    };
-  });
-  
-  // Add foreground colors as a separate group
-  tokens[`${palette.name}-foregrounds`] = {
-    $type: 'color',
-    $description: 'Foreground colors for accessibility',
-  };
-  
-  palette.stops.forEach((stop) => {
-    tokens[`${palette.name}-foregrounds`][`${stop.stop}-light`] = {
-      $value: stop.foregrounds.light.hex,
-      $type: 'color',
-      $description: `Light foreground for ${palette.name}/${stop.stop} (contrast: ${stop.foregrounds.light.contrast.toFixed(2)}:1, WCAG AA: ${stop.foregrounds.light.wcagAA ? 'Pass' : 'Fail'})`,
-    };
+  if (failures.length === 0) {
+    report += `✅ ALL COMBINATIONS PASS WCAG AA STANDARD (4.5:1)\n`;
+    report += `   No contrast issues found!\n\n`;
+  } else {
+    report += `Found ${failures.length} combinations that FAIL WCAG AA standard (4.5:1):\n\n`;
     
-    tokens[`${palette.name}-foregrounds`][`${stop.stop}-dark`] = {
-      $value: stop.foregrounds.dark.hex,
-      $type: 'color',
-      $description: `Dark foreground for ${palette.name}/${stop.stop} (contrast: ${stop.foregrounds.dark.contrast.toFixed(2)}:1, WCAG AA: ${stop.foregrounds.dark.wcagAA ? 'Pass' : 'Fail'})`,
-    };
+    failures.forEach(f => {
+      report += `❌ Stop ${f.stop} • ${f.fgType} foreground\n`;
+      report += `   Background: ${f.bg} → Foreground: ${f.fg}\n`;
+      report += `   Contrast: ${f.ratio.toFixed(2)}:1 (needs 4.5:1 minimum)\n\n`;
+    });
+  }
+  
+  report += `${"=".repeat(80)}\n\n`;
+  
+  // Detailed report
+  report += `## DETAILED CONTRAST ANALYSIS\n\n`;
+  
+  palette.stops.forEach(stop => {
+    report += `### Stop ${stop.stop}\n`;
+    report += `Background: ${stop.background.hex}\n`;
+    report += `Recommended: Use ${stop.recommendedForeground} foreground\n\n`;
     
-    // Add recommended foreground for convenience
-    tokens[`${palette.name}-foregrounds`][`${stop.stop}-recommended`] = {
-      $value: stop.foregrounds[stop.recommendedForeground].hex,
-      $type: 'color',
-      $description: `Recommended foreground (${stop.recommendedForeground}) for ${palette.name}/${stop.stop}`,
-    };
+    // Light foreground
+    const lightRatio = stop.foregrounds.light.contrast;
+    const lightStatus = lightRatio >= 4.5 ? 'PASS' : 'FAIL';
+    report += `  • Light Foreground (${stop.foregrounds.light.hex})\n`;
+    report += `    Contrast: ${lightRatio.toFixed(2)}:1\n`;
+    report += `    Status: ${lightStatus}\n`;
+    if (lightRatio >= 7) report += `    Level: AAA ✓\n`;
+    else if (lightRatio >= 4.5) report += `    Level: AA ✓\n`;
+    else report += `    Level: Does not meet WCAG standards\n`;
+    report += `\n`;
+    
+    // Dark foreground
+    const darkRatio = stop.foregrounds.dark.contrast;
+    const darkStatus = darkRatio >= 4.5 ? 'PASS' : 'FAIL';
+    report += `  • Dark Foreground (${stop.foregrounds.dark.hex})\n`;
+    report += `    Contrast: ${darkRatio.toFixed(2)}:1\n`;
+    report += `    Status: ${darkStatus}\n`;
+    if (darkRatio >= 7) report += `    Level: AAA ✓\n`;
+    else if (darkRatio >= 4.5) report += `    Level: AA ✓\n`;
+    else report += `    Level: Does not meet WCAG standards\n`;
+    report += `\n`;
   });
   
-  return tokens;
+  report += `\n${"=".repeat(80)}\n\n`;
+  report += `## WCAG STANDARDS\n\n`;
+  report += `AA:  4.5:1 minimum (normal text), 3:1 (large text 18pt+)\n`;
+  report += `AAA: 7:1 minimum (normal text), 4.5:1 (large text 18pt+)\n`;
+  
+  return report;
 }
 
 /**
- * Save palette to file
+ * Save content to file
  */
 export function saveToFile(content: string, filepath: string): void {
   const dir = path.dirname(filepath);
@@ -212,38 +196,23 @@ export function saveToFile(content: string, filepath: string): void {
 }
 
 /**
- * Generate all export formats and save to files
+ * Export Figma formats and contrast report
  */
 export function exportAll(palette: ColorPalette, outputDir: string): {
   figma: string;
-  designTokens: string;
-  json: string;
-  css: string;
-  tailwind: string;
+  contrastReport: string;
 } {
   const figmaPath = path.join(outputDir, `${palette.name}-figma.json`);
-  const designTokensPath = path.join(outputDir, `${palette.name}-design-tokens.json`);
-  const jsonPath = path.join(outputDir, `${palette.name}.json`);
-  const cssPath = path.join(outputDir, `${palette.name}.css`);
-  const tailwindPath = path.join(outputDir, `${palette.name}-tailwind.js`);
+  const contrastReportPath = path.join(outputDir, `${palette.name}-contrast-report.txt`);
   
   const figmaContent = JSON.stringify(exportToFigma(palette), null, 2);
-  const designTokensContent = JSON.stringify(exportToDesignTokens(palette), null, 2);
-  const jsonContent = exportToJSON(palette);
-  const cssContent = exportToCSS(palette);
-  const tailwindContent = exportToTailwind(palette);
+  const contrastReportContent = exportContrastReport(palette);
   
   saveToFile(figmaContent, figmaPath);
-  saveToFile(designTokensContent, designTokensPath);
-  saveToFile(jsonContent, jsonPath);
-  saveToFile(cssContent, cssPath);
-  saveToFile(tailwindContent, tailwindPath);
+  saveToFile(contrastReportContent, contrastReportPath);
   
   return {
     figma: figmaPath,
-    designTokens: designTokensPath,
-    json: jsonPath,
-    css: cssPath,
-    tailwind: tailwindPath,
+    contrastReport: contrastReportPath,
   };
 }

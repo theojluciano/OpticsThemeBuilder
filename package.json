@@ -1,7 +1,7 @@
 {
   "name": "opticsthemebuilder",
   "version": "1.0.0",
-  "description": "Generate accessible color palettes with automatic foreground color selection",
+  "description": "Generate accessible color palettes for Figma with automatic foreground color selection and WCAG contrast checking",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -22,11 +22,11 @@
     "wcag",
     "contrast",
     "figma",
+    "figma-variables",
     "optics",
     "light-dark",
     "dark-mode",
-    "theme-switching",
-    "css-variables"
+    "theme-switching"
   ],
   "author": "",
   "license": "ISC",

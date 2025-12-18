@@ -3,15 +3,15 @@
 import { Command } from 'commander';
 import { generatePalette } from './generator';
 import { generateOpticsPalette } from './optics-generator';
-import { exportAll, exportToFigma, saveToFile, exportToJSON, exportToCSS, exportToTailwind } from './exporter';
-import { exportOpticsAll, exportOpticsToCSS, exportOpticsToJSON, exportOpticsToFigma, exportOpticsToTailwind, exportOpticsToDesignTokens } from './optics-exporter';
+import { exportAll, saveToFile } from './exporter';
+import { exportOpticsAll, exportOpticsToFigma, saveOpticsToFile } from './optics-exporter';
 import * as path from 'path';
 
 const program = new Command();
 
 program
   .name('optics')
-  .description('Generate accessible color palettes with automatic foreground color selection')
+  .description('Generate accessible color palettes for Figma with automatic foreground color selection')
   .version('1.0.0');
 
 program
@@ -21,7 +21,6 @@ program
   .option('-n, --name <name>', 'Name for the palette', 'palette')
   .option('-s, --stops <number>', 'Number of color stops (ignored with --optics)', '16')
   .option('-o, --output <directory>', 'Output directory for generated files', './output')
-  .option('-f, --format <format>', 'Export format: all, figma, json, css, tailwind', 'all')
   .option('-m, --mode <mode>', 'Mode for Figma export: light, dark, or both', 'both')
   .option('--optics', 'Generate using Optics scale format (19 stops with light-dark mode)')
   .action((color: string, options) => {
@@ -49,70 +48,40 @@ program
           console.log(`   ${' '.repeat(12)}  Dark  ${stop.background.dark.hex} → on:${stop.darkModeContrast.on.toFixed(1)} alt:${stop.darkModeContrast.onAlt.toFixed(1)}`);
         });
         
-        console.log('\n📦 Exporting Optics format files...');
+        console.log('\n📦 Exporting Figma files...');
         
         const outputDir = options.output;
-        const format = options.format.toLowerCase();
+        const mode = options.mode.toLowerCase();
         
-        if (format === 'all') {
+        if (mode === 'both') {
           const files = exportOpticsAll(opticsPalette, outputDir);
-          Object.entries(files).forEach(([key, file]: [string, string]) => {
-            const label = key === 'figmaLight' ? 'Figma Variables (Light)' :
-                         key === 'figmaDark' ? 'Figma Variables (Dark)' :
-                         key === 'designTokens' ? 'Design Tokens' :
-                         key === 'json' ? 'JSON' :
-                         key === 'css' ? 'CSS' :
-                         key === 'tailwind' ? 'Tailwind' : key;
-            console.log(`   ✓ ${label}: ${path.basename(file)}`);
-          });
-        } else if (format === 'figma') {
-          const mode = options.mode.toLowerCase();
-          
-          if (mode === 'both' || mode === 'light') {
-            const filepath = path.join(outputDir, `${opticsPalette.name}-light.tokens.json`);
-            const content = exportOpticsToFigma(opticsPalette, 'Light');
-            saveToFile(content, filepath);
-            console.log(`   ✓ Figma Variables (Light): ${filepath}`);
-          }
-          
-          if (mode === 'both' || mode === 'dark') {
-            const filepath = path.join(outputDir, `${opticsPalette.name}-dark.tokens.json`);
-            const content = exportOpticsToFigma(opticsPalette, 'Dark');
-            saveToFile(content, filepath);
-            console.log(`   ✓ Figma Variables (Dark): ${filepath}`);
-          }
-          
-          if (mode !== 'both' && mode !== 'light' && mode !== 'dark') {
-            console.error(`❌ Error: Invalid mode "${mode}". Use: light, dark, or both`);
-            process.exit(1);
-          }
-        } else if (format === 'json') {
-          const filepath = path.join(outputDir, `${opticsPalette.name}-optics.json`);
-          const content = exportOpticsToJSON(opticsPalette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ JSON: ${filepath}`);
-        } else if (format === 'css') {
-          const filepath = path.join(outputDir, `${opticsPalette.name}-optics.css`);
-          const content = exportOpticsToCSS(opticsPalette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ CSS: ${filepath}`);
-        } else if (format === 'tailwind') {
-          const filepath = path.join(outputDir, `${opticsPalette.name}-optics-tailwind.js`);
-          const content = exportOpticsToTailwind(opticsPalette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ Tailwind: ${filepath}`);
+          console.log(`   ✓ Figma Variables (Light): ${path.basename(files.figmaLight)}`);
+          console.log(`   ✓ Figma Variables (Dark): ${path.basename(files.figmaDark)}`);
+          console.log(`   ✓ Contrast Report: ${path.basename(files.contrastReport)}`);
+        } else if (mode === 'light') {
+          const filepath = path.join(outputDir, `${opticsPalette.name}-light.tokens.json`);
+          const contrastReportPath = path.join(outputDir, `${opticsPalette.name}-contrast-report.txt`);
+          const content = exportOpticsToFigma(opticsPalette, 'Light');
+          saveOpticsToFile(content, filepath);
+          console.log(`   ✓ Figma Variables (Light): ${path.basename(filepath)}`);
+          console.log(`   ✓ Contrast Report: ${path.basename(contrastReportPath)}`);
+        } else if (mode === 'dark') {
+          const filepath = path.join(outputDir, `${opticsPalette.name}-dark.tokens.json`);
+          const contrastReportPath = path.join(outputDir, `${opticsPalette.name}-contrast-report.txt`);
+          const content = exportOpticsToFigma(opticsPalette, 'Dark');
+          saveOpticsToFile(content, filepath);
+          console.log(`   ✓ Figma Variables (Dark): ${path.basename(filepath)}`);
+          console.log(`   ✓ Contrast Report: ${path.basename(contrastReportPath)}`);
         } else {
-          console.error(`❌ Unknown format: ${format}`);
+          console.error(`❌ Error: Invalid mode "${mode}". Use: light, dark, or both`);
           process.exit(1);
         }
         
         console.log('\n✨ Done! Your Optics palette is ready.\n');
-        if (format === 'figma' || format === 'all') {
-          console.log('💡 Tip: Import each .tokens.json file into Figma Variables panel');
-          console.log('   1. Open Figma → Variables panel');
-          console.log('   2. Import Light mode file, then Dark mode file');
-          console.log('   3. Figma will automatically create a variable collection with both modes');
-        }
+        console.log('💡 Tip: Import each .tokens.json file into Figma Variables panel');
+        console.log('   1. Open Figma → Variables panel');
+        console.log('   2. Import Light mode file, then Dark mode file');
+        console.log('   3. Figma will automatically create a variable collection with both modes');
         
       } else {
         // Original palette generation
@@ -140,61 +109,17 @@ program
           console.log(`   Stop ${String(stop.stop).padStart(2)}: ${stop.background.hex} → ${recommended === 'light' ? 'Light' : 'Dark'} (L:${lightPass} ${stop.foregrounds.light.contrast.toFixed(1)} D:${darkPass} ${stop.foregrounds.dark.contrast.toFixed(1)})`);
         });
 
-        console.log('\n📦 Exporting files...');
+        console.log('\n📦 Exporting Figma files...');
 
-        // Export based on format option
+        // Export files
         const outputDir = options.output;
-        const format = options.format.toLowerCase();
+        const files = exportAll(palette, outputDir);
+        
+        console.log(`   ✓ Figma Variables: ${path.basename(files.figma)}`);
+        console.log(`   ✓ Contrast Report: ${path.basename(files.contrastReport)}`);
 
-        if (format === 'all') {
-          const files = exportAll(palette, outputDir);
-          console.log(`   ✓ Figma Variables: ${files.figma}`);
-          console.log(`   ✓ Design Tokens: ${files.designTokens}`);
-          console.log(`   ✓ JSON: ${files.json}`);
-          console.log(`   ✓ CSS: ${files.css}`);
-          console.log(`   ✓ Tailwind: ${files.tailwind}`);
-        } else if (format === 'figma') {
-          const mode = options.mode.toLowerCase();
-          
-          if (mode === 'both' || mode === 'light') {
-            const filepath = path.join(outputDir, `${palette.name}-light.tokens.json`);
-            const content = JSON.stringify(exportToFigma(palette, 'Light'), null, 2);
-            saveToFile(content, filepath);
-            console.log(`   ✓ Figma Variables (Light): ${filepath}`);
-          }
-          
-          if (mode === 'both' || mode === 'dark') {
-            const filepath = path.join(outputDir, `${palette.name}-dark.tokens.json`);
-            const content = JSON.stringify(exportToFigma(palette, 'Dark'), null, 2);
-            saveToFile(content, filepath);
-            console.log(`   ✓ Figma Variables (Dark): ${filepath}`);
-          }
-          
-          if (mode !== 'both' && mode !== 'light' && mode !== 'dark') {
-            console.error(`❌ Error: Invalid mode "${mode}". Use: light, dark, or both`);
-            process.exit(1);
-          }
-        } else if (format === 'json') {
-          const filepath = path.join(outputDir, `${palette.name}.json`);
-          const content = exportToJSON(palette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ JSON: ${filepath}`);
-        } else if (format === 'css') {
-          const filepath = path.join(outputDir, `${palette.name}.css`);
-          const content = exportToCSS(palette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ CSS: ${filepath}`);
-        } else if (format === 'tailwind') {
-          const filepath = path.join(outputDir, `${palette.name}-tailwind.js`);
-          const content = exportToTailwind(palette);
-          saveToFile(content, filepath);
-          console.log(`   ✓ Tailwind: ${filepath}`);
-        } else {
-          console.error(`❌ Error: Unknown format "${format}". Use: all, figma, json, css, or tailwind`);
-          process.exit(1);
-        }
-
-        console.log('\n✨ Done!\n');
+        console.log('\n✨ Done! Your palette is ready.\n');
+        console.log('💡 Tip: Import the .json file into Figma Variables panel');
       }
     } catch (error) {
       console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`);

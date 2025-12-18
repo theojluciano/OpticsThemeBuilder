@@ -1,6 +1,6 @@
 # OpticsThemeBuilder 🎨
 
-Generate accessible color palettes with automatic foreground color selection and WCAG contrast checking.
+Generate accessible color palettes for Figma with automatic foreground color selection and WCAG contrast checking.
 
 ## Features
 
@@ -9,7 +9,8 @@ Generate accessible color palettes with automatic foreground color selection and
 - ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA)
 - 🎨 **HSL-Based**: Uses HSL color space for intuitive, predictable color manipulation
 - 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background
-- 📦 **Multiple Export Formats**: Figma Variables, JSON, CSS Custom Properties, and Tailwind
+- 📦 **Figma Variables Export**: Direct export to Figma Variables JSON format with contrast reports
+- 🖥️ **Interactive UI**: Web-based editor with live contrast checking and real-time adjustments
 - 🚀 **CLI & Library**: Use as a command-line tool or import into your Node.js project
 
 ## Installation
@@ -26,6 +27,24 @@ npm install opticsthemebuilder
 
 ## Quick Start
 
+### Interactive UI (Recommended)
+
+Open `ui/index.html` in your browser for a visual editor:
+
+1. Enter your base color (e.g., `#3b82f6`)
+2. Click "Generate Palette"
+3. Adjust luminosity sliders while watching contrast ratios update in real-time
+4. Switch between Light and Dark modes
+5. Export Figma Variables when satisfied
+
+**Features:**
+- ✨ Live contrast checking with visual indicators
+- 🎨 Real-time color preview
+- 📊 Instant feedback on passing/failing tests
+- 💾 Export directly to Figma Variables JSON
+
+See [ui/README.md](ui/README.md) for detailed usage instructions.
+
 ### CLI Usage
 
 Generate a complete color palette from a single color:
@@ -39,12 +58,11 @@ optics generate "#3b82f6" --name "blue" --optics
 ```
 
 This creates:
-- `blue-light.tokens.json` / `blue-dark.tokens.json` - Figma Variables format (separate files for each mode)
-- `blue.json` - Complete palette data
-- `blue.css` - CSS Custom Properties
-- `blue-tailwind.js` - Tailwind configuration
+- `blue-figma.json` - Figma Variables format (standard palette)
+- `blue-light.tokens.json` / `blue-dark.tokens.json` - Figma Variables format (Optics format, separate files for each mode)
+- `blue-contrast-report.txt` - WCAG contrast analysis report
 
-**New: Optics Format** - Use `--optics` flag for semantic naming (`plus-max`, `base`, `minus-max`) with built-in light/dark mode support. See [OPTICS_FORMAT.md](OPTICS_FORMAT.md) for details.
+**Optics Format** - Use `--optics` flag for semantic naming (`plus-max`, `base`, `minus-max`) with built-in light/dark mode support. See [OPTICS_FORMAT.md](OPTICS_FORMAT.md) for details.
 
 ### Advanced CLI Options
 
@@ -53,26 +71,24 @@ This creates:
 optics generate "#3b82f6" \
   --name "primary" \
   --stops 16 \
-  --output ./themes \
-  --format figma
+  --output ./themes
 
 # Optics format
 optics generate "#3b82f6" \
   --name "primary" \
   --optics \
-  --output ./themes \
-  --format all
+  --output ./themes
 
-# Generate Figma Variables for specific mode
+# Generate Figma Variables for Light mode only (Optics)
 optics generate "#3b82f6" \
   --name "primary" \
-  --format figma \
+  --optics \
   --mode light
 
-# Generate both Light and Dark modes (default)
+# Generate both Light and Dark modes (default for Optics)
 optics generate "#3b82f6" \
   --name "primary" \
-  --format figma \
+  --optics \
   --mode both
 ```
 
@@ -80,9 +96,24 @@ optics generate "#3b82f6" \
 - `--name, -n`: Name for the palette (default: "palette")
 - `--stops, -s`: Number of color stops (default: 16, range: 2-100, ignored with --optics)
 - `--output, -o`: Output directory (default: "./output")
-- `--format, -f`: Export format - `all`, `figma`, `json`, `css`, or `tailwind` (default: "all")
-- `--mode, -m`: Mode for Figma export - `light`, `dark`, or `both` (default: "both")
+- `--mode, -m`: Mode for Figma export (Optics only) - `light`, `dark`, or `both` (default: "both")
 - `--optics`: Generate using Optics scale format (19 stops with light-dark mode)
+
+## Understanding Contrast Reports
+
+Every generated palette includes a contrast report showing which color combinations meet WCAG standards:
+
+```
+## ⚠️  FAILURES SUMMARY
+
+Found 3 combinations that FAIL WCAG AA standard (4.5:1):
+
+❌ Dark Mode • primary/minus-four (L:1%) → primary/minus-four-on (L:0%)
+   Background: #156af4 → Foreground: #00040a
+   Contrast: 4.30:1 (needs 4.5:1 minimum)
+```
+
+The report uses Optics naming (e.g., `primary/minus-four-on`) so you can immediately identify which stops need adjustment without matching hex codes.
 
 ### Analyze Contrast
 

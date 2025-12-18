@@ -1,31 +1,7 @@
-import { hsl, rgb, formatHex, Hsl, Rgb, converter } from 'culori';
+import { formatHex, Hsl, Rgb } from 'culori';
 import { getContrastRatio, meetsWCAG_AA, meetsWCAG_AAA } from './contrast';
-import { ColorStop, ColorPalette, HSLColor, RGBColor } from './types';
-
-const toRgb = converter('rgb');
-const toHsl = converter('hsl');
-
-/**
- * Convert culori color to our HSL type
- */
-function toHSLColor(color: Hsl): HSLColor {
-  return {
-    h: color.h || 0,
-    s: color.s || 0,
-    l: color.l || 0,
-  };
-}
-
-/**
- * Convert culori color to our RGB type
- */
-function toRGBColor(color: Rgb): RGBColor {
-  return {
-    r: color.r,
-    g: color.g,
-    b: color.b,
-  };
-}
+import { ColorStop, ColorPalette, HSLColor } from './types';
+import { parseColor, toHSLColor, toRGBColor, hslToRgb } from './color-utils';
 
 /**
  * Generate a perceptually distributed lightness scale
@@ -66,24 +42,26 @@ function generateForegroundColors(background: Hsl): {
   light: { color: Hsl; contrast: number };
   dark: { color: Hsl; contrast: number };
 } {
-  const bgRgb = toRgb(background) as Rgb;
+  const bgRgb = hslToRgb(background);
   
   // Light foreground (near white)
-  const lightForeground = hsl({
+  const lightForeground: Hsl = {
+    mode: 'hsl',
     h: background.h,
     s: (background.s || 0) * 0.1, // Reduce saturation significantly
     l: 0.98,
-  })!;
+  };
   
   // Dark foreground (near black)
-  const darkForeground = hsl({
+  const darkForeground: Hsl = {
+    mode: 'hsl',
     h: background.h,
     s: (background.s || 0) * 0.15, // Slight saturation for warmth
     l: 0.08,
-  })!;
+  };
   
-  const lightRgb = toRgb(lightForeground) as Rgb;
-  const darkRgb = toRgb(darkForeground) as Rgb;
+  const lightRgb = hslToRgb(lightForeground);
+  const darkRgb = hslToRgb(darkForeground);
   
   return {
     light: {
@@ -123,23 +101,8 @@ export function generatePalette(
   totalStops: number = 16
 ): ColorPalette {
   // Parse base color
-  let baseHsl: Hsl;
-  
-  if (typeof baseColorInput === 'string') {
-    const parsed = hsl(baseColorInput);
-    if (!parsed) {
-      throw new Error(`Invalid color input: ${baseColorInput}`);
-    }
-    baseHsl = parsed;
-  } else {
-    baseHsl = hsl({
-      h: baseColorInput.h,
-      s: baseColorInput.s,
-      l: baseColorInput.l,
-    })!;
-  }
-  
-  const baseRgb = toRgb(baseHsl) as Rgb;
+  const baseHsl = parseColor(baseColorInput);
+  const baseRgb = hslToRgb(baseHsl);
   const baseHex = formatHex(baseRgb);
   
   // Generate lightness scale
@@ -150,13 +113,14 @@ export function generatePalette(
     // Create background color with adjusted saturation
     const adjustedSaturation = adjustSaturation(baseHsl.s || 0, lightness);
     
-    const bgColor = hsl({
+    const bgColor: Hsl = {
+      mode: 'hsl',
       h: baseHsl.h,
       s: adjustedSaturation,
       l: lightness,
-    })!;
+    };
     
-    const bgRgb = toRgb(bgColor) as Rgb;
+    const bgRgb = hslToRgb(bgColor);
     const bgHex = formatHex(bgRgb);
     
     // Generate foreground colors
@@ -175,7 +139,7 @@ export function generatePalette(
       foregrounds: {
         light: {
           hsl: toHSLColor(foregrounds.light.color),
-          rgb: toRGBColor(toRgb(foregrounds.light.color) as Rgb),
+          rgb: toRGBColor(hslToRgb(foregrounds.light.color)),
           hex: formatHex(foregrounds.light.color),
           contrast: foregrounds.light.contrast,
           wcagAA: meetsWCAG_AA(foregrounds.light.contrast),
@@ -183,7 +147,7 @@ export function generatePalette(
         },
         dark: {
           hsl: toHSLColor(foregrounds.dark.color),
-          rgb: toRGBColor(toRgb(foregrounds.dark.color) as Rgb),
+          rgb: toRGBColor(hslToRgb(foregrounds.dark.color)),
           hex: formatHex(foregrounds.dark.color),
           contrast: foregrounds.dark.contrast,
           wcagAA: meetsWCAG_AA(foregrounds.dark.contrast),
@@ -213,9 +177,6 @@ export function generatePalette(
  * Parse HSL string like "hsl(220, 80%, 50%)" or object
  */
 export function parseHSLInput(input: string): HSLColor {
-  const parsed = hsl(input);
-  if (!parsed) {
-    throw new Error(`Invalid HSL input: ${input}`);
-  }
+  const parsed = parseColor(input);
   return toHSLColor(parsed);
 }

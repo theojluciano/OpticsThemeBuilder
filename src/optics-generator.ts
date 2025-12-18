@@ -1,31 +1,7 @@
-import { hsl, rgb, formatHex, Hsl, Rgb, converter } from 'culori';
+import { formatHex, Rgb } from 'culori';
 import { getContrastRatio } from './contrast';
-import { OpticsStopName, OpticsColorValue, OpticsColorStop, OpticsPalette, HSLColor, RGBColor } from './types';
-
-const toRgb = converter('rgb');
-const toHsl = converter('hsl');
-
-/**
- * Convert culori color to our HSL type
- */
-function toHSLColor(color: Hsl): HSLColor {
-  return {
-    h: color.h || 0,
-    s: color.s || 0,
-    l: color.l || 0,
-  };
-}
-
-/**
- * Convert culori color to our RGB type
- */
-function toRGBColor(color: Rgb): RGBColor {
-  return {
-    r: color.r,
-    g: color.g,
-    b: color.b,
-  };
-}
+import { OpticsStopName, OpticsColorStop, OpticsPalette, HSLColor } from './types';
+import { parseColor, toHSLColor, toRGBColor, createHsl, hslToRgb } from './color-utils';
 
 /**
  * Optics scale stop names in order from lightest to darkest (light mode perspective)
@@ -208,11 +184,11 @@ const DARK_MODE_ON_ALT: Record<OpticsStopName, number> = {
  */
 function createColorValue(h: number, s: number, l: number): {
   hsl: HSLColor;
-  rgb: RGBColor;
+  rgb: { r: number; g: number; b: number };
   hex: string;
 } {
-  const hslColor = hsl({ h, s: s / 100, l: l / 100 })!;
-  const rgbColor = toRgb(hslColor) as Rgb;
+  const hslColor = createHsl(h, s, l);
+  const rgbColor = hslToRgb(hslColor);
   
   return {
     hsl: toHSLColor(hslColor),
@@ -233,23 +209,8 @@ export function generateOpticsPalette(
   name: string = 'primary'
 ): OpticsPalette {
   // Parse base color
-  let baseHsl: Hsl;
-  
-  if (typeof baseColorInput === 'string') {
-    const parsed = hsl(baseColorInput);
-    if (!parsed) {
-      throw new Error(`Invalid color input: ${baseColorInput}`);
-    }
-    baseHsl = parsed;
-  } else {
-    baseHsl = hsl({
-      h: baseColorInput.h,
-      s: baseColorInput.s,
-      l: baseColorInput.l,
-    })!;
-  }
-  
-  const baseRgb = toRgb(baseHsl) as Rgb;
+  const baseHsl = parseColor(baseColorInput);
+  const baseRgb = hslToRgb(baseHsl);
   const baseHex = formatHex(baseRgb);
   
   // Extract H and S from base color (as percentages)
@@ -271,12 +232,12 @@ export function generateOpticsPalette(
     const darkOnAlt = createColorValue(h, s, DARK_MODE_ON_ALT[stopName]);
     
     // Calculate contrast ratios
-    const lightBgRgb = toRgb(hsl({ h, s: s / 100, l: LIGHT_MODE_LIGHTNESS[stopName] / 100 })) as Rgb;
-    const darkBgRgb = toRgb(hsl({ h, s: s / 100, l: DARK_MODE_LIGHTNESS[stopName] / 100 })) as Rgb;
-    const lightOnRgb = toRgb(hsl({ h, s: s / 100, l: LIGHT_MODE_ON[stopName] / 100 })) as Rgb;
-    const darkOnRgb = toRgb(hsl({ h, s: s / 100, l: DARK_MODE_ON[stopName] / 100 })) as Rgb;
-    const lightOnAltRgb = toRgb(hsl({ h, s: s / 100, l: LIGHT_MODE_ON_ALT[stopName] / 100 })) as Rgb;
-    const darkOnAltRgb = toRgb(hsl({ h, s: s / 100, l: DARK_MODE_ON_ALT[stopName] / 100 })) as Rgb;
+    const lightBgRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_LIGHTNESS[stopName]));
+    const darkBgRgb = hslToRgb(createHsl(h, s, DARK_MODE_LIGHTNESS[stopName]));
+    const lightOnRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_ON[stopName]));
+    const darkOnRgb = hslToRgb(createHsl(h, s, DARK_MODE_ON[stopName]));
+    const lightOnAltRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_ON_ALT[stopName]));
+    const darkOnAltRgb = hslToRgb(createHsl(h, s, DARK_MODE_ON_ALT[stopName]));
     
     return {
       name: stopName,
