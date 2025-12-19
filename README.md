@@ -2,18 +2,83 @@
 
 Generate accessible color palettes for Figma with automatic foreground color selection and WCAG contrast checking.
 
+**Features both a visual web UI for interactive editing and a CLI tool for automation.**
+
+## Table of Contents
+
+- [Quick Start](#quick-start) - Get running in minutes (UI or CLI)
+- [Features](#features) - What this tool can do
+- [Installation](#installation) - Setup instructions
+- [Interactive UI Usage](#interactive-ui-usage) - Visual editor guide
+- [CLI Usage](#cli-usage) - Command-line tool reference
+- [Understanding Contrast Reports](#understanding-contrast-reports) - WCAG compliance checking
+- [Library Usage](#library-usage) - Use as a Node.js package
+- [Export Formats](#export-formats) - Figma, JSON, CSS, Tailwind
+- [Optics Scale Format](#optics-scale-format) - 19-stop semantic scale system
+- [Requirements & Dependencies](#requirements--dependencies)
+- [Troubleshooting](#troubleshooting)
+
+## Quick Start
+
+### Interactive UI (Recommended for visual editing)
+
+```bash
+cd optics-ui
+npm install
+npm run dev
+# Open http://localhost:5173 in your browser
+# Requires a modern browser (Chrome, Firefox, Safari, or Edge)
+```
+
+Then use the visual editor to:
+- Generate palettes from any base color
+- Adjust luminosity with live contrast checking
+- Configure Light and Dark modes independently
+- Export Figma Variables JSON files
+
+### CLI (For automation and scripting)
+
+```bash
+# Install globally
+npm install -g opticsthemebuilder
+
+# Generate an Optics palette
+optics generate "#3b82f6" --name "primary" --optics
+
+# Or run locally without installing
+cd OpticsThemeBuilder
+npm install
+npm run build
+node dist/cli.js generate "#3b82f6" --name "primary" --optics
+```
+
 ## Features
 
-- 🎯 **Smart Color Scaling**: Generates 16 perceptually-distributed color stops from any base color
+- 🖥️ **Interactive Web UI**: Svelte-based visual editor with live WCAG contrast checking, independent Light/Dark mode configuration, and real-time luminosity adjustments for all 19 Optics stops
+- 🎯 **Smart Color Scaling**: Generates 16 perceptually-distributed color stops from any base color (CLI)
 - 🌓 **Optics Scale Format**: 19 semantic stops with light/dark mode support (`plus-max` to `minus-max`)
-- ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA)
+- ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA) with visual pass/fail indicators
 - 🎨 **HSL-Based**: Uses HSL color space for intuitive, predictable color manipulation
-- 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background
-- 📦 **Figma Variables Export**: Direct export to Figma Variables JSON format with contrast reports
-- 🖥️ **Interactive UI**: Web-based editor with live contrast checking and real-time adjustments
-- 🚀 **CLI & Library**: Use as a command-line tool or import into your Node.js project
+- 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background, plus alternative foregrounds
+- 📦 **Figma Variables Export**: Direct export to Figma Variables JSON format with contrast reports (both UI and CLI)
+- 🚀 **CLI & Library**: Use as a command-line tool or import into your Node.js project for automation
 
 ## Installation
+
+### Interactive UI
+
+No global installation needed. Clone the repo and run:
+
+```bash
+git clone <repository-url>
+cd OpticsThemeBuilder/optics-ui
+npm install
+npm run dev
+```
+
+### CLI Tool
+
+Install globally for command-line usage:
 
 ```bash
 npm install -g opticsthemebuilder
@@ -25,27 +90,36 @@ Or use locally in a project:
 npm install opticsthemebuilder
 ```
 
-## Quick Start
+## Interactive UI Usage
 
-### Interactive UI (Recommended)
+**Color Input:**
+- Use color picker for visual selection or manually enter H (0-360°) and S (0-100%) values
+- Enter palette name (e.g., `primary`)
+- Click "Generate Palette" to populate all 19 Optics stops with defaults
 
-Open `ui/index.html` in your browser for a visual editor:
+**Adjust Luminosity:**
+Each color stop card has three sliders:
+- **Background**: Background color lightness (0-100%)
+- **On**: Primary foreground lightness for text/icons
+- **On-Alt**: Alternative foreground option
+- Each displays live contrast ratios with pass/fail indicators (4.5:1 minimum)
 
-1. Enter your base color (e.g., `#3b82f6`)
-2. Click "Generate Palette"
-3. Adjust luminosity sliders while watching contrast ratios update in real-time
-4. Switch between Light and Dark modes
-5. Export Figma Variables when satisfied
+**Light/Dark Modes:**
+- Click Light/Dark toggle to switch modes
+- Each mode has independent luminosity values
+- Summary dashboard shows passing/failing tests (38 total = 2 per stop × 19 stops)
 
-**Features:**
-- ✨ Live contrast checking with visual indicators
-- 🎨 Real-time color preview
-- 📊 Instant feedback on passing/failing tests
-- 💾 Export directly to Figma Variables JSON
+**Export:**
+- **Export Figma (Light/Dark)** → Downloads `.tokens.json` files for Figma import
+- **Export Config JSON** → Saves all custom luminosity values
 
-See [ui/README.md](ui/README.md) for detailed usage instructions.
+**Tips for achieving WCAG AA contrast:**
+- Light backgrounds (L>50%) need dark foregrounds (L<40%)
+- Dark backgrounds (L<50%) need light foregrounds (L>60%)
+- Aim for 40%+ lightness difference between background and foreground
+- Cards with red borders have failing tests - adjust sliders until green
 
-### CLI Usage
+## CLI Usage
 
 Generate a complete color palette from a single color:
 
@@ -101,7 +175,9 @@ optics generate "#3b82f6" \
 
 ## Understanding Contrast Reports
 
-Every generated palette includes a contrast report showing which color combinations meet WCAG standards:
+### CLI Reports
+
+Every CLI-generated palette includes a contrast report showing which color combinations meet WCAG standards:
 
 ```
 ## ⚠️  FAILURES SUMMARY
@@ -115,24 +191,23 @@ Found 3 combinations that FAIL WCAG AA standard (4.5:1):
 
 The report uses Optics naming (e.g., `primary/minus-four-on`) so you can immediately identify which stops need adjustment without matching hex codes.
 
-### Analyze Contrast
+### Interactive UI Contrast Checking
 
-Check contrast between two colors:
+The web UI provides real-time WCAG AA contrast validation:
+
+- **Live contrast ratios**: Each color stop card displays contrast ratios for both "on" and "on-alt" foregrounds
+- **Pass/fail indicators**: Visual green (passing) or red (failing) indicators with 4.5:1 minimum threshold
+- **Summary dashboard**: Shows total passing/failing tests across all 19 stops
+- **Mode-specific**: Independent contrast checking for Light and Dark modes
+- **Instant feedback**: Contrast recalculates as you adjust luminosity sliders
+
+This allows you to fine-tune your palette interactively until all combinations meet WCAG AA standards.
+
+### CLI Contrast Analysis
 
 ```bash
 optics analyze "#3b82f6" "#ffffff"
-```
-
-Output:
-```
-🔍 Contrast Analysis
-
-   Background: #3b82f6
-   Foreground: #ffffff
-   Contrast Ratio: 4.54:1
-
-   WCAG AA (4.5:1):  ✅ Pass
-   WCAG AAA (7:1):   ❌ Fail
+# Output: Contrast ratio, WCAG AA/AAA pass/fail
 ```
 
 ## Library Usage
@@ -454,15 +529,15 @@ const stop: ColorStop = palette.stops[0];
 const hsl: HSLColor = stop.background.hsl;
 ```
 
-## Requirements
+## Requirements & Dependencies
 
-- Node.js 14 or higher
-- NPM or Yarn
+**CLI & Library:**
+- Node.js 14+, NPM/Yarn
+- Dependencies: `culori` (colors), `commander` (CLI)
 
-## Dependencies
-
-- `culori` - Color manipulation and conversion
-- `commander` - CLI interface
+**Interactive UI:**
+- Node.js 14+, NPM/Yarn, modern browser
+- Dependencies: `svelte`, `culori`, `vite`, `typescript`
 
 ## Optics Scale Format
 
@@ -549,6 +624,17 @@ The export format has been validated against Figma plugin exports:
 
 ISC
 
+## Troubleshooting
+
+**UI Issues:**
+- Sliders not responding? Refresh page or restart dev server
+- Can't achieve 4.5:1 contrast? Increase lightness difference between bg/fg (40%+ recommended)
+- Export not working? Check browser allows downloads
+
+**CLI Issues:**
+- Type errors? Run `npm run check` to validate TypeScript
+- Colors look wrong? Verify H (0-360) and S (0-100) are in valid ranges
+
 ## Contributing
 
 Contributions welcome! Please open an issue or PR.
@@ -559,4 +645,7 @@ Built with ❤️ for designers and developers who care about accessibility.
 
 ---
 
-**Pro Tip**: For the best results, start with colors that have medium lightness (40-60%) and high saturation (70-100%). This gives the algorithm the most room to generate a full range of tints and shades.
+**Pro Tips**: 
+- Start with medium saturation (70-90%) for best results
+- For CLI: Use medium lightness (40-60%) base colors to generate full tint/shade ranges
+- Achieving WCAG AA requires 40%+ lightness difference between backgrounds and foregrounds
