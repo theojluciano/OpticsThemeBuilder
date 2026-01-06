@@ -47,13 +47,13 @@
         Mode
         <div class={styles.toggle}>
           <button 
-            class:active={$palette.mode === 'light'}
+            class={$palette.mode === 'light' ? styles.active : ''}
             on:click={() => handleModeChange('light')}
           >
             Light
           </button>
           <button 
-            class:active={$palette.mode === 'dark'}
+            class={$palette.mode === 'dark' ? styles.active : ''}
             on:click={() => handleModeChange('dark')}
           >
             Dark
