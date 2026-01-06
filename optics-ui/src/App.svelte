@@ -30,27 +30,35 @@
   <div class="config-section">
     <div class="config-row">
       <label>
-        Palette Name:
-        <input type="text" bind:value={nameInput} on:change={handleNameChange} placeholder="primary" />
+        Palette Name
+        <input 
+          type="text" 
+          bind:value={nameInput} 
+          on:change={handleNameChange} 
+          placeholder="primary"
+          name="palette-name"
+        />
       </label>
     </div>
 
     <div class="config-row">
-      <span class="label-text">Mode:</span>
-      <div class="toggle">
-        <button 
-          class:active={$palette.mode === 'light'}
-          on:click={() => handleModeChange('light')}
-        >
-          Light
-        </button>
-        <button 
-          class:active={$palette.mode === 'dark'}
-          on:click={() => handleModeChange('dark')}
-        >
-          Dark
-        </button>
-      </div>
+      <label>
+        Mode
+        <div class="toggle">
+          <button 
+            class:active={$palette.mode === 'light'}
+            on:click={() => handleModeChange('light')}
+          >
+            Light
+          </button>
+          <button 
+            class:active={$palette.mode === 'dark'}
+            on:click={() => handleModeChange('dark')}
+          >
+            Dark
+          </button>
+        </div>
+      </label>
     </div>
   </div>
 
@@ -90,17 +98,6 @@
     align-items: center;
   }
 
-  h1 {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #e5e5e5;
-  }
-
-  .subtitle {
-    color: #888;
-    font-size: 14px;
-  }
 
   .grid {
     display: grid;
@@ -163,23 +160,24 @@
     align-items: center;
   }
 
-  .config-section label,
-  .config-section .label-text {
+  .config-section label {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 4px;
     font-weight: 500;
     color: #e5e5e5;
+    font-size: 14px
   }
 
   .config-section input[type="text"] {
     padding: 8px 12px;
     background: #0f0f0f;
     border: 1px solid #444;
-    border-radius: 4px;
+    border-radius: 8px;
     color: #e5e5e5;
     width: 200px;
     font-size: 14px;
+    height: 40px;
   }
 
   .config-section input[type="text"]:focus {
@@ -192,7 +190,7 @@
     gap: 8px;
     background: #0f0f0f;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: 8px;
     border: 1px solid #444;
   }
 

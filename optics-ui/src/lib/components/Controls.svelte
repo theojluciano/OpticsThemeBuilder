@@ -44,14 +44,11 @@
 
 <div class="controls">
   <div class="row">
-    <label>
-      Base Color:
-      <input 
-        type="color" 
-        value={colorPickerValue}
-        on:input={handleColorPickerChange}
-      />
-    </label>
+    <input 
+      type="color" 
+      value={colorPickerValue}
+      on:input={handleColorPickerChange}
+    />
     <div class="hsl-inputs">
       <label class="hsl-label">
         H:
@@ -96,32 +93,23 @@
     margin-bottom: 0;
   }
 
-  label,
-  .label-text {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 120px;
-    font-weight: 500;
-    color: #e5e5e5;
-  }
 
   input[type="color"] {
     width: 60px;
-    height: 40px;
+    height: 60px;
     border: 1px solid #444;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #0f0f0f;
     cursor: pointer;
   }
 
   input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 2px;
+    padding: 4px;
   }
 
   input[type="color"]::-webkit-color-swatch {
     border: 1px solid #666;
-    border-radius: 2px;
+    border-radius: 4px;
   }
 
   .hsl-inputs {
@@ -135,7 +123,7 @@
     align-items: center;
     gap: 6px;
     min-width: auto;
-    font-size: 13px;
+    font-size: 14px;
     color: #888;
   }
 
@@ -144,27 +132,13 @@
     padding: 6px 8px;
     background: #0f0f0f;
     border: 1px solid #444;
-    border-radius: 4px;
+    border-radius: 8px;
     color: #e5e5e5;
     font-size: 14px;
+    height: 40px;
   }
 
   input[type="number"]:focus {
-    outline: none;
-    border-color: #3b82f6;
-  }
-
-  input[type="text"] {
-    padding: 8px 12px;
-    background: #0f0f0f;
-    border: 1px solid #444;
-    border-radius: 4px;
-    color: #e5e5e5;
-    width: 200px;
-    font-size: 14px;
-  }
-
-  input[type="text"]:focus {
     outline: none;
     border-color: #3b82f6;
   }
@@ -173,39 +147,16 @@
     padding: 8px 20px;
     background: #3b82f6;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     color: white;
     font-weight: 500;
     cursor: pointer;
     font-size: 14px;
+    height: 40px;
   }
 
   button:hover {
     background: #2563eb;
   }
 
-  .toggle {
-    display: flex;
-    gap: 8px;
-    background: #0f0f0f;
-    padding: 4px;
-    border-radius: 4px;
-    border: 1px solid #444;
-  }
-
-  .toggle button {
-    background: transparent;
-    color: #888;
-    padding: 8px 16px;
-  }
-
-  .toggle button.active {
-    background: #3b82f6;
-    color: white;
-  }
-
-  .toggle button:hover {
-    background: #3b82f6;
-    color: white;
-  }
 </style>
