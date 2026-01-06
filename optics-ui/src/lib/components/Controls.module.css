@@ -1,16 +1,13 @@
 .controls {
+  display: inline-flex;
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
-.row {
-  display: flex;
-  gap: 20px;
+  height: 100px;
+  padding-inline: 20px;
+  flex: 1;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0;
 }
 
 .colorInput {

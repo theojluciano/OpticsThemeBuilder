@@ -44,39 +44,35 @@
 </script>
 
 <div class={styles.controls}>
-  <div class={styles.row}>
-    <input 
-      type="color" 
-      class={styles.colorInput}
-      value={colorPickerValue}
-      on:input={handleColorPickerChange}
-    />
-    <div class={styles.hslInputs}>
-      <label class={styles.hslLabel}>
-        H:
-        <input 
-          type="number" 
-          class={styles.numberInput}
-          min="0" 
-          max="360" 
-          bind:value={hInput}
-          on:input={handleHSLInput}
-        />
-      </label>
-      <label class={styles.hslLabel}>
-        S:
-        <input 
-          type="number" 
-          class={styles.numberInput}
-          min="0" 
-          max="100" 
-          bind:value={sInput}
-          on:input={handleHSLInput}
-        />
-      </label>
-    </div>
-    <button class={styles.button} on:click={handleGenerate}>Generate Palette</button>
+  <input 
+    type="color" 
+    class={styles.colorInput}
+    value={colorPickerValue}
+    on:input={handleColorPickerChange}
+  />
+  <div class={styles.hslInputs}>
+    <label class={styles.hslLabel}>
+      H:
+      <input 
+        type="number" 
+        class={styles.numberInput}
+        min="0" 
+        max="360" 
+        bind:value={hInput}
+        on:input={handleHSLInput}
+      />
+    </label>
+    <label class={styles.hslLabel}>
+      S:
+      <input 
+        type="number" 
+        class={styles.numberInput}
+        min="0" 
+        max="100" 
+        bind:value={sInput}
+        on:input={handleHSLInput}
+      />
+    </label>
   </div>
-
-
+  <button class={styles.button} on:click={handleGenerate}>Generate Palette</button>
 </div>

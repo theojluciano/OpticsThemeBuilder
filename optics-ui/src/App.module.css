@@ -49,10 +49,12 @@
 
 .logoContainer {
   background: white;
-  padding: 12px 20px;
+  height: 100px;
+  width: 100px;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .logo {
