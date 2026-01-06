@@ -77,30 +77,7 @@
     <button on:click={handleGenerate}>Generate Palette</button>
   </div>
 
-  <div class="row">
-    <label>
-      Palette Name:
-      <input type="text" bind:value={nameInput} placeholder="primary" />
-    </label>
-  </div>
 
-  <div class="row">
-    <span class="label-text">Mode:</span>
-    <div class="toggle">
-      <button 
-        class:active={$palette.mode === 'light'}
-        on:click={() => handleModeChange('light')}
-      >
-        Light
-      </button>
-      <button 
-        class:active={$palette.mode === 'dark'}
-        on:click={() => handleModeChange('dark')}
-      >
-        Dark
-      </button>
-    </div>
-  </div>
 </div>
 
 <style>
@@ -114,12 +91,8 @@
 
   .row {
     display: flex;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
-    margin-bottom: 15px;
-  }
-
-  .row:last-child {
     margin-bottom: 0;
   }
 
