@@ -2,6 +2,7 @@
   import { palette } from '../stores/palette';
   import { parseBaseColor } from '../utils/colors';
   import * as culori from 'culori';
+  import styles from './Controls.module.css';
 
   let colorPickerValue = $palette.baseColor;
   let hInput = Math.round($palette.h);
@@ -42,28 +43,31 @@
   }
 </script>
 
-<div class="controls">
-  <div class="row">
+<div class={styles.controls}>
+  <div class={styles.row}>
     <input 
       type="color" 
+      class={styles.colorInput}
       value={colorPickerValue}
       on:input={handleColorPickerChange}
     />
-    <div class="hsl-inputs">
-      <label class="hsl-label">
+    <div class={styles.hslInputs}>
+      <label class={styles.hslLabel}>
         H:
         <input 
           type="number" 
+          class={styles.numberInput}
           min="0" 
           max="360" 
           bind:value={hInput}
           on:input={handleHSLInput}
         />
       </label>
-      <label class="hsl-label">
+      <label class={styles.hslLabel}>
         S:
         <input 
           type="number" 
+          class={styles.numberInput}
           min="0" 
           max="100" 
           bind:value={sInput}
@@ -71,92 +75,8 @@
         />
       </label>
     </div>
-    <button on:click={handleGenerate}>Generate Palette</button>
+    <button class={styles.button} on:click={handleGenerate}>Generate Palette</button>
   </div>
 
 
 </div>
-
-<style>
-  .controls {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-
-  .row {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 0;
-  }
-
-
-  input[type="color"] {
-    width: 60px;
-    height: 60px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    background: #0f0f0f;
-    cursor: pointer;
-  }
-
-  input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 4px;
-  }
-
-  input[type="color"]::-webkit-color-swatch {
-    border: 1px solid #666;
-    border-radius: 4px;
-  }
-
-  .hsl-inputs {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .hsl-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: auto;
-    font-size: 14px;
-    color: #888;
-  }
-
-  input[type="number"] {
-    width: 65px;
-    padding: 6px 8px;
-    background: #0f0f0f;
-    border: 1px solid #444;
-    border-radius: 8px;
-    color: #e5e5e5;
-    font-size: 14px;
-    height: 40px;
-  }
-
-  input[type="number"]:focus {
-    outline: none;
-    border-color: #3b82f6;
-  }
-
-  button {
-    padding: 8px 20px;
-    background: #3b82f6;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 14px;
-    height: 40px;
-  }
-
-  button:hover {
-    background: #2563eb;
-  }
-
-</style>

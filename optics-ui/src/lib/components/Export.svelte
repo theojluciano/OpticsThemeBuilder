@@ -2,6 +2,7 @@
   import { palette } from '../stores/palette';
   import { exportFigmaJSON, downloadFile } from '../utils/export';
   import { OPTICS_STOPS } from '../data/defaults';
+  import styles from './Export.module.css';
 
   function handleExport(mode: 'light' | 'dark') {
     const bgValues = mode === 'light' ? $palette.lightBg : $palette.darkBg;
@@ -53,61 +54,17 @@
   }
 </script>
 
-<div class="export">
-  <h3>Export Options</h3>
-  <div class="buttons">
-    <button on:click={() => handleExport('light')}>
+<div class={styles.export}>
+  <h3 class={styles.title}>Export Options</h3>
+  <div class={styles.buttons}>
+    <button class={styles.button} on:click={() => handleExport('light')}>
       Export Figma (Light)
     </button>
-    <button on:click={() => handleExport('dark')}>
+    <button class={styles.button} on:click={() => handleExport('dark')}>
       Export Figma (Dark)
     </button>
-    <button class="secondary" on:click={handleExportConfig}>
+    <button class="{styles.button} {styles.secondary}" on:click={handleExportConfig}>
       Export Config JSON
     </button>
   </div>
 </div>
-
-<style>
-  .export {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 20px;
-  }
-
-  h3 {
-    color: #e5e5e5;
-    margin-bottom: 15px;
-    font-size: 18px;
-  }
-
-  .buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  button {
-    padding: 12px 24px;
-    background: #10b981;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  button:hover {
-    background: #059669;
-  }
-
-  button.secondary {
-    background: #6b7280;
-  }
-
-  button.secondary:hover {
-    background: #4b5563;
-  }
-</style>

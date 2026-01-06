@@ -1,0 +1,46 @@
+.summary {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.title {
+  color: #e5e5e5;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stat {
+  background: #0f0f0f;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #e5e5e5;
+}
+
+.value.pass {
+  color: #10b981;
+}
+
+.value.fail {
+  color: #ef4444;
+}
+
+.label {
+  color: #888;
+  font-size: 13px;
+}
