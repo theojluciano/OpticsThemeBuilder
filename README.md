@@ -4,6 +4,18 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 
 **Features both a visual web UI for interactive editing and a CLI tool for automation.**
 
+## Recent Updates ✨
+
+**v2.0 - Major UI Redesign (Current)**
+- 🎨 **Multiple Color Types**: Manage Primary, Neutral, Secondary, Notice, Warning, Danger, Info, and custom color types in one workspace
+- 🎛️ **Per-Type Controls**: Independent H/S color pickers for each color type
+- 📦 **Unified Export**: All enabled color types export to a single `optics-{mode}.tokens.json` file
+- 🧩 **Collapsible Sections**: Clean, organized interface with expand/collapse for each color type
+- 📊 **Inline Summaries**: Per-type contrast summaries show pass/fail counts at a glance
+- ☀️🌙 **Header Controls**: Mode toggle and export moved to header for better space utilization
+- 🎯 **Consistent Styling**: Centralized color picker styles in shared module for uniform appearance
+- ➕ **Custom Types**: Add, rename, and delete custom color types as needed
+
 ## Table of Contents
 
 - [Quick Start](#quick-start) - Get running in minutes (UI or CLI)
@@ -31,10 +43,11 @@ npm run dev
 ```
 
 Then use the visual editor to:
-- Generate palettes from any base color
-- Adjust luminosity with live contrast checking
+- Manage multiple color types (Primary, Neutral, Secondary, Notice, Warning, Danger, Info)
+- Add custom color types with independent color controls
+- Adjust luminosity for all 19 Optics stops with live contrast checking
 - Configure Light and Dark modes independently
-- Export Figma Variables JSON files
+- Export all enabled color types to a single Figma tokens JSON file
 
 ### CLI (For automation and scripting)
 
@@ -54,14 +67,15 @@ node dist/cli.js generate "#3b82f6" --name "primary" --optics
 
 ## Features
 
-- 🖥️ **Interactive Web UI**: Svelte-based visual editor with live WCAG contrast checking, independent Light/Dark mode configuration, and real-time luminosity adjustments for all 19 Optics stops
-- 🎯 **Smart Color Scaling**: Generates 16 perceptually-distributed color stops from any base color (CLI)
+- 🖥️ **Interactive Web UI**: Svelte-based visual editor with multiple color type management, collapsible sections, live WCAG contrast checking, and real-time luminosity adjustments for all 19 Optics stops
+- 🎨 **Multiple Color Types**: Built-in support for Primary, Neutral, Secondary, Notice, Warning, Danger, and Info color scales, plus the ability to add custom color types
+- 🎛️ **Per-Type Color Controls**: Each color type has independent hue and saturation controls with visual color pickers
 - 🌓 **Optics Scale Format**: 19 semantic stops with light/dark mode support (`plus-max` to `minus-max`)
-- ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA) with visual pass/fail indicators
-- 🎨 **HSL-Based**: Uses HSL color space for intuitive, predictable color manipulation
+- ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA) with visual pass/fail indicators and per-type summaries
 - 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background, plus alternative foregrounds
-- 📦 **Figma Variables Export**: Direct export to Figma Variables JSON format with contrast reports (both UI and CLI)
+- 📦 **Unified Figma Export**: Export all enabled color types to a single Figma tokens JSON file per mode (light/dark)
 - 🚀 **CLI & Library**: Use as a command-line tool or import into your Node.js project for automation
+- 🎯 **Smart Color Scaling**: Generates 16 perceptually-distributed color stops from any base color (CLI)
 
 ## Installation
 
@@ -92,32 +106,47 @@ npm install opticsthemebuilder
 
 ## Interactive UI Usage
 
-**Color Input:**
-- Use color picker for visual selection or manually enter H (0-360°) and S (0-100%) values
-- Enter palette name (e.g., `primary`)
-- Click "Generate Palette" to populate all 19 Optics stops with defaults
+**Managing Color Types:**
+- Each color type (Primary, Neutral, Secondary, etc.) has its own collapsible section
+- Toggle color types on/off using the switch in each section header
+- Click section header to expand/collapse and view all 19 color stops
+- Each section shows a contrast summary (e.g., "32 / 38" = 32 passing tests out of 38 total)
 
-**Adjust Luminosity:**
+**Color Controls:**
+- Each color type has independent H (Hue: 0-360°) and S (Saturation: 0-100%) controls in its header
+- Use the color picker for visual selection or type values directly
+- Changes apply to all stops within that color type
+
+**Adding Custom Color Types:**
+- Click "+ Add Custom Color Type" at the bottom
+- Enter a name (e.g., "Accent", "Brand")
+- Set the base color using the picker or H/S values
+- Custom types can be renamed or deleted
+
+**Adjusting Luminosity:**
 Each color stop card has three sliders:
 - **Background**: Background color lightness (0-100%)
 - **On**: Primary foreground lightness for text/icons
 - **On-Alt**: Alternative foreground option
-- Each displays live contrast ratios with pass/fail indicators (4.5:1 minimum)
+- Each displays live contrast ratios with pass/fail indicators (4.5:1 minimum for AA)
 
 **Light/Dark Modes:**
-- Click Light/Dark toggle to switch modes
-- Each mode has independent luminosity values
-- Summary dashboard shows passing/failing tests (38 total = 2 per stop × 19 stops)
+- Toggle between Light and Dark modes using the sun/moon icons in the header
+- Each mode has independent luminosity values for all stops
+- Each color type shows its own contrast summary
 
 **Export:**
-- **Export Figma (Light/Dark)** → Downloads `.tokens.json` files for Figma import
-- **Export Config JSON** → Saves all custom luminosity values
+- Click "Export for Figma" in the header
+- Downloads a single `optics-{mode}.tokens.json` file (e.g., `optics-light.tokens.json`)
+- The file contains all enabled color types with their current mode settings
+- Import the file directly into Figma as Variables
 
 **Tips for achieving WCAG AA contrast:**
 - Light backgrounds (L>50%) need dark foregrounds (L<40%)
 - Dark backgrounds (L<50%) need light foregrounds (L>60%)
 - Aim for 40%+ lightness difference between background and foreground
 - Cards with red borders have failing tests - adjust sliders until green
+- Use the contrast summary to track overall progress per color type
 
 ## CLI Usage
 
@@ -627,13 +656,20 @@ ISC
 ## Troubleshooting
 
 **UI Issues:**
-- Sliders not responding? Refresh page or restart dev server
+- Sliders not responding? Refresh page or restart dev server (`npm run dev` in `optics-ui/`)
 - Can't achieve 4.5:1 contrast? Increase lightness difference between bg/fg (40%+ recommended)
-- Export not working? Check browser allows downloads
+- Export downloads one file per color type? Make sure you're using the latest version (now exports all enabled types to one file)
+- Color type not showing in export? Check that it's toggled on (switch in section header)
+- Color picker values not updating? Try using the number inputs directly or refresh the page
 
 **CLI Issues:**
 - Type errors? Run `npm run check` to validate TypeScript
 - Colors look wrong? Verify H (0-360) and S (0-100) are in valid ranges
+
+**Architecture Notes:**
+- Color picker styles are centralized in `src/lib/styles/shared.module.css` for consistency
+- Each color type is managed independently with its own H/S values
+- Export format combines all enabled types into a single JSON structure per mode
 
 ## Contributing
 
