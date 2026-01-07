@@ -1,6 +1,16 @@
 import { ColorPalette } from './types';
-import * as fs from 'fs';
 import * as path from 'path';
+import { saveToFile, saveJsonToFile } from './file-utils';
+import { hexToFigmaColor, createColorToken, generateVariableId, createRootExtensions } from './figma-utils';
+import {
+  generateReportHeader,
+  generateFailuresSummary,
+  generateContrastEntry,
+  generateStandardsFooter,
+  passesWCAG_AA,
+  ContrastFailure,
+  ContrastEntry,
+} from './contrast-report-utils';
 
 /**
  * Export palette to Figma Variables Import format
@@ -8,32 +18,15 @@ import * as path from 'path';
  */
 export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): any {
   const root: any = {};
-  
-  // Helper to convert RGB to components array for Figma
-  const rgbToComponents = (rgb: { r: number; g: number; b: number }) => [
-    rgb.r,
-    rgb.g,
-    rgb.b,
-  ];
-  
-  // Helper to create color value object
-  const createColorValue = (hex: string, rgb: { r: number; g: number; b: number }) => ({
-    colorSpace: 'srgb',
-    components: rgbToComponents(rgb),
-    alpha: 1,
-    hex: hex,
-  });
-  
-  // Create nested structure for palette
   const paletteGroup: any = {};
   
   // Add background colors
   palette.stops.forEach((stop) => {
     paletteGroup[stop.stop] = {
       $type: 'color',
-      $value: createColorValue(stop.background.hex, stop.background.rgb),
+      $value: hexToFigmaColor(stop.background.hex),
       $extensions: {
-        'com.figma.variableId': `VariableID:${Math.random().toString(36).substring(2, 15)}`,
+        'com.figma.variableId': generateVariableId(),
         'com.figma.scopes': ['ALL_SCOPES'],
         'com.figma.codeSyntax': {
           WEB: stop.background.hex,
@@ -52,9 +45,9 @@ export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): an
   palette.stops.forEach((stop) => {
     foregroundGroup.light[stop.stop] = {
       $type: 'color',
-      $value: createColorValue(stop.foregrounds.light.hex, stop.foregrounds.light.rgb),
+      $value: hexToFigmaColor(stop.foregrounds.light.hex),
       $extensions: {
-        'com.figma.variableId': `VariableID:${Math.random().toString(36).substring(2, 15)}`,
+        'com.figma.variableId': generateVariableId(),
         'com.figma.scopes': ['ALL_SCOPES'],
         'com.figma.codeSyntax': {
           WEB: stop.foregrounds.light.hex,
@@ -67,9 +60,9 @@ export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): an
   palette.stops.forEach((stop) => {
     foregroundGroup.dark[stop.stop] = {
       $type: 'color',
-      $value: createColorValue(stop.foregrounds.dark.hex, stop.foregrounds.dark.rgb),
+      $value: hexToFigmaColor(stop.foregrounds.dark.hex),
       $extensions: {
-        'com.figma.variableId': `VariableID:${Math.random().toString(36).substring(2, 15)}`,
+        'com.figma.variableId': generateVariableId(),
         'com.figma.scopes': ['ALL_SCOPES'],
         'com.figma.codeSyntax': {
           WEB: stop.foregrounds.dark.hex,
@@ -81,8 +74,6 @@ export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): an
   // Build root structure
   root[palette.name] = paletteGroup;
   root[`${palette.name}-foregrounds`] = foregroundGroup;
-  
-  // Add root-level extensions
   root.$extensions = {
     'com.figma.modeName': mode,
   };
@@ -94,55 +85,46 @@ export function exportToFigma(palette: ColorPalette, mode: string = 'Light'): an
  * Generate a contrast report for standard (non-Optics) palettes
  */
 export function exportContrastReport(palette: ColorPalette): string {
-  let report = `# WCAG Contrast Report\n`;
-  report += `# Palette: ${palette.name}\n`;
-  report += `# Base Color: ${palette.baseColor.hex}\n`;
-  report += `# Total Stops: ${palette.stops.length}\n\n`;
-  report += `${"=".repeat(80)}\n\n`;
+  // Generate header
+  let report = generateReportHeader(
+    palette.name,
+    palette.baseColor.hex,
+    palette.stops.length
+  );
   
   // Collect failures
-  const failures: Array<{stop: number; bg: string; fg: string; fgType: string; ratio: number}> = [];
+  const failures: ContrastFailure[] = [];
   
   palette.stops.forEach(stop => {
-    if (stop.foregrounds.light.contrast < 4.5) {
+    if (!passesWCAG_AA(stop.foregrounds.light.contrast)) {
       failures.push({
         stop: stop.stop,
-        bg: stop.background.hex,
-        fg: stop.foregrounds.light.hex,
-        fgType: 'light',
-        ratio: stop.foregrounds.light.contrast
+        background: stop.background.hex,
+        backgroundLightness: Math.round(stop.background.hsl.l),
+        foreground: stop.foregrounds.light.hex,
+        foregroundLightness: Math.round(stop.foregrounds.light.hsl.l),
+        foregroundType: 'light',
+        ratio: stop.foregrounds.light.contrast,
       });
     }
-    if (stop.foregrounds.dark.contrast < 4.5) {
+    
+    if (!passesWCAG_AA(stop.foregrounds.dark.contrast)) {
       failures.push({
         stop: stop.stop,
-        bg: stop.background.hex,
-        fg: stop.foregrounds.dark.hex,
-        fgType: 'dark',
-        ratio: stop.foregrounds.dark.contrast
+        background: stop.background.hex,
+        backgroundLightness: Math.round(stop.background.hsl.l),
+        foreground: stop.foregrounds.dark.hex,
+        foregroundLightness: Math.round(stop.foregrounds.dark.hsl.l),
+        foregroundType: 'dark',
+        ratio: stop.foregrounds.dark.contrast,
       });
     }
   });
   
-  // Failures summary
-  report += `## ⚠️  FAILURES SUMMARY\n\n`;
+  // Generate failures summary
+  report += generateFailuresSummary(failures);
   
-  if (failures.length === 0) {
-    report += `✅ ALL COMBINATIONS PASS WCAG AA STANDARD (4.5:1)\n`;
-    report += `   No contrast issues found!\n\n`;
-  } else {
-    report += `Found ${failures.length} combinations that FAIL WCAG AA standard (4.5:1):\n\n`;
-    
-    failures.forEach(f => {
-      report += `❌ Stop ${f.stop} • ${f.fgType} foreground\n`;
-      report += `   Background: ${f.bg} → Foreground: ${f.fg}\n`;
-      report += `   Contrast: ${f.ratio.toFixed(2)}:1 (needs 4.5:1 minimum)\n\n`;
-    });
-  }
-  
-  report += `${"=".repeat(80)}\n\n`;
-  
-  // Detailed report
+  // Generate detailed report
   report += `## DETAILED CONTRAST ANALYSIS\n\n`;
   
   palette.stops.forEach(stop => {
@@ -151,48 +133,28 @@ export function exportContrastReport(palette: ColorPalette): string {
     report += `Recommended: Use ${stop.recommendedForeground} foreground\n\n`;
     
     // Light foreground
-    const lightRatio = stop.foregrounds.light.contrast;
-    const lightStatus = lightRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • Light Foreground (${stop.foregrounds.light.hex})\n`;
-    report += `    Contrast: ${lightRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${lightStatus}\n`;
-    if (lightRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (lightRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
+    const lightEntry: ContrastEntry = {
+      label: `Light Foreground (${stop.foregrounds.light.hex})`,
+      hex: stop.foregrounds.light.hex,
+      lightness: Math.round(stop.foregrounds.light.hsl.l),
+      ratio: stop.foregrounds.light.contrast,
+    };
+    report += generateContrastEntry(lightEntry);
     
     // Dark foreground
-    const darkRatio = stop.foregrounds.dark.contrast;
-    const darkStatus = darkRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • Dark Foreground (${stop.foregrounds.dark.hex})\n`;
-    report += `    Contrast: ${darkRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${darkStatus}\n`;
-    if (darkRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (darkRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
+    const darkEntry: ContrastEntry = {
+      label: `Dark Foreground (${stop.foregrounds.dark.hex})`,
+      hex: stop.foregrounds.dark.hex,
+      lightness: Math.round(stop.foregrounds.dark.hsl.l),
+      ratio: stop.foregrounds.dark.contrast,
+    };
+    report += generateContrastEntry(darkEntry);
   });
   
-  report += `\n${"=".repeat(80)}\n\n`;
-  report += `## WCAG STANDARDS\n\n`;
-  report += `AA:  4.5:1 minimum (normal text), 3:1 (large text 18pt+)\n`;
-  report += `AAA: 7:1 minimum (normal text), 4.5:1 (large text 18pt+)\n`;
+  // Add footer
+  report += generateStandardsFooter();
   
   return report;
-}
-
-/**
- * Save content to file
- */
-export function saveToFile(content: string, filepath: string): void {
-  const dir = path.dirname(filepath);
-  
-  // Create directory if it doesn't exist
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  
-  fs.writeFileSync(filepath, content, 'utf-8');
 }
 
 /**
@@ -205,10 +167,10 @@ export function exportAll(palette: ColorPalette, outputDir: string): {
   const figmaPath = path.join(outputDir, `${palette.name}-figma.json`);
   const contrastReportPath = path.join(outputDir, `${palette.name}-contrast-report.txt`);
   
-  const figmaContent = JSON.stringify(exportToFigma(palette), null, 2);
+  const figmaData = exportToFigma(palette);
   const contrastReportContent = exportContrastReport(palette);
   
-  saveToFile(figmaContent, figmaPath);
+  saveJsonToFile(figmaData, figmaPath);
   saveToFile(contrastReportContent, contrastReportPath);
   
   return {

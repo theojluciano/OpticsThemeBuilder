@@ -1,27 +1,16 @@
 import { OpticsPalette } from './types';
-import * as fs from 'fs';
 import * as path from 'path';
-
-/**
- * Convert hex color to Figma color value format
- */
-function hexToFigmaColor(hex: string): any {
-  // Remove # if present
-  const cleanHex = hex.replace('#', '');
-  
-  // Parse RGB values
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
-  
-  // Convert to 0-1 range
-  return {
-    colorSpace: 'srgb',
-    components: [r / 255, g / 255, b / 255],
-    alpha: 1.0,
-    hex: hex.toUpperCase()
-  };
-}
+import { saveToFile, saveJsonToFile } from './file-utils';
+import { createColorToken } from './figma-utils';
+import {
+  generateReportHeader,
+  generateFailuresSummary,
+  generateContrastEntry,
+  generateStandardsFooter,
+  passesWCAG_AA,
+  ContrastFailure,
+  ContrastEntry,
+} from './contrast-report-utils';
 
 /**
  * Export Optics palette to Figma Variables Import format
@@ -35,7 +24,6 @@ export function exportOpticsToFigma(palette: OpticsPalette, mode: 'Light' | 'Dar
   const collectionName = 'op-color';
   
   // Build tokens with flat structure matching Optics format
-  // Initialize groups in the desired order: base, plus, minus, on
   const tokens: any = {
     [palette.name]: {
       base: null,
@@ -53,81 +41,44 @@ export function exportOpticsToFigma(palette: OpticsPalette, mode: 'Light' | 'Dar
   // Process each stop
   palette.stops.forEach((stop) => {
     const stopName = stop.name;
+    const { groupName, varName } = parseStopName(stopName);
     
-    // Determine group and variable name
-    let groupName: string;
-    let varName: string;
+    // Select the appropriate colors based on mode
+    const bgHex = isLightMode ? stop.background.light.hex : stop.background.dark.hex;
+    const onHex = isLightMode ? stop.on.light.hex : stop.on.dark.hex;
+    const onAltHex = isLightMode ? stop.onAlt.light.hex : stop.onAlt.dark.hex;
     
-    if (stopName === 'base') {
-      // Base goes directly under palette name
-      groupName = '';
-      varName = 'base';
-    } else if (stopName.startsWith('plus-')) {
-      groupName = 'plus';
-      varName = stopName.replace('plus-', '');
-    } else if (stopName.startsWith('minus-')) {
-      groupName = 'minus';
-      varName = stopName.replace('minus-', '');
-    } else {
-      groupName = '';
-      varName = stopName;
-    }
+    // Create variables
+    const bgVariable = createColorToken(
+      bgHex,
+      `${palette.name}-${stop.name}-bg`,
+      `var(--op-color-${palette.name}-${stop.name}-bg)`
+    );
     
-    // Create background color variable
-    const bgVariable = {
-      $type: 'color',
-      $value: hexToFigmaColor(isLightMode ? stop.background.light.hex : stop.background.dark.hex),
-      $extensions: {
-        'com.figma.variableId': `${palette.name}-${stop.name}-bg`,
-        'com.figma.scopes': ['ALL_SCOPES'],
-        'com.figma.codeSyntax': {
-          WEB: `var(--op-color-${palette.name}-${stop.name}-bg)`
-        }
-      }
-    };
+    const onVariable = createColorToken(
+      onHex,
+      `${palette.name}-${stop.name}-on`,
+      `var(--op-color-${palette.name}-${stop.name}-on)`
+    );
     
-    // Create on (foreground) variable
-    const onVariable = {
-      $type: 'color',
-      $value: hexToFigmaColor(isLightMode ? stop.on.light.hex : stop.on.dark.hex),
-      $extensions: {
-        'com.figma.variableId': `${palette.name}-${stop.name}-on`,
-        'com.figma.scopes': ['ALL_SCOPES'],
-        'com.figma.codeSyntax': {
-          WEB: `var(--op-color-${palette.name}-${stop.name}-on)`
-        }
-      }
-    };
+    const onAltVariable = createColorToken(
+      onAltHex,
+      `${palette.name}-${stop.name}-on-alt`,
+      `var(--op-color-${palette.name}-${stop.name}-on-alt)`
+    );
     
-    // Create on-alt variable
-    const onAltVariable = {
-      $type: 'color',
-      $value: hexToFigmaColor(isLightMode ? stop.onAlt.light.hex : stop.onAlt.dark.hex),
-      $extensions: {
-        'com.figma.variableId': `${palette.name}-${stop.name}-on-alt`,
-        'com.figma.scopes': ['ALL_SCOPES'],
-        'com.figma.codeSyntax': {
-          WEB: `var(--op-color-${palette.name}-${stop.name}-on-alt)`
-        }
-      }
-    };
-    
-    // Place background colors - flat structure
+    // Place background colors
     if (groupName === '') {
-      // Base case - place directly under palette
       tokens[palette.name][varName] = bgVariable;
     } else {
-      // Plus/minus case - place directly under group
       tokens[palette.name][groupName][varName] = bgVariable;
     }
     
-    // Place foreground colors in 'on' group - flat structure
+    // Place foreground colors in 'on' group
     if (groupName === '') {
-      // Base case - place directly under palette/on
       tokens[palette.name]['on'][varName] = onVariable;
       tokens[palette.name]['on'][`${varName}-alt`] = onAltVariable;
     } else {
-      // Plus/minus case - place under palette/on/group
       tokens[palette.name]['on'][groupName][varName] = onVariable;
       tokens[palette.name]['on'][groupName][`${varName}-alt`] = onAltVariable;
     }
@@ -145,175 +96,132 @@ export function exportOpticsToFigma(palette: OpticsPalette, mode: 'Light' | 'Dar
 }
 
 /**
+ * Parse Optics stop name into group and variable name
+ */
+function parseStopName(stopName: string): { groupName: string; varName: string } {
+  if (stopName === 'base') {
+    return { groupName: '', varName: 'base' };
+  } else if (stopName.startsWith('plus-')) {
+    return { groupName: 'plus', varName: stopName.replace('plus-', '') };
+  } else if (stopName.startsWith('minus-')) {
+    return { groupName: 'minus', varName: stopName.replace('minus-', '') };
+  }
+  return { groupName: '', varName: stopName };
+}
+
+/**
  * Generate a simple, clear contrast report with PASS/FAIL indicators
  */
 export function exportOpticsContrastReport(palette: OpticsPalette): string {
-  let report = `# WCAG Contrast Report\n`;
-  report += `# Palette: ${palette.name}\n`;
-  report += `# Base Color: ${palette.baseColor.hex}\n\n`;
-  report += `${"=".repeat(80)}\n\n`;
+  // Generate header
+  let report = generateReportHeader(
+    palette.name,
+    palette.baseColor.hex,
+    palette.stops.length
+  );
   
-  // Collect all failures first
-  const failures: Array<{mode: string; stop: string; bg: string; bgL: number; fg: string; fgL: number; fgType: string; ratio: number}> = [];
+  // Collect all failures
+  const failures: ContrastFailure[] = [];
   
   palette.stops.forEach(stop => {
     // Light mode failures
-    if (stop.lightModeContrast.on < 4.5) {
-      failures.push({
-        mode: 'Light',
-        stop: stop.name,
-        bg: stop.background.light.hex,
-        bgL: Math.round(stop.background.light.hsl.l),
-        fg: stop.on.light.hex,
-        fgL: Math.round(stop.on.light.hsl.l),
-        fgType: 'on',
-        ratio: stop.lightModeContrast.on
-      });
+    if (!passesWCAG_AA(stop.lightModeContrast.on)) {
+      failures.push(createFailure('Light', palette.name, stop.name, stop.background.light, stop.on.light, 'on', stop.lightModeContrast.on));
     }
-    if (stop.lightModeContrast.onAlt < 4.5) {
-      failures.push({
-        mode: 'Light',
-        stop: stop.name,
-        bg: stop.background.light.hex,
-        bgL: Math.round(stop.background.light.hsl.l),
-        fg: stop.onAlt.light.hex,
-        fgL: Math.round(stop.onAlt.light.hsl.l),
-        fgType: 'on-alt',
-        ratio: stop.lightModeContrast.onAlt
-      });
+    if (!passesWCAG_AA(stop.lightModeContrast.onAlt)) {
+      failures.push(createFailure('Light', palette.name, stop.name, stop.background.light, stop.onAlt.light, 'on-alt', stop.lightModeContrast.onAlt));
     }
     
     // Dark mode failures
-    if (stop.darkModeContrast.on < 4.5) {
-      failures.push({
-        mode: 'Dark',
-        stop: stop.name,
-        bg: stop.background.dark.hex,
-        bgL: Math.round(stop.background.dark.hsl.l),
-        fg: stop.on.dark.hex,
-        fgL: Math.round(stop.on.dark.hsl.l),
-        fgType: 'on',
-        ratio: stop.darkModeContrast.on
-      });
+    if (!passesWCAG_AA(stop.darkModeContrast.on)) {
+      failures.push(createFailure('Dark', palette.name, stop.name, stop.background.dark, stop.on.dark, 'on', stop.darkModeContrast.on));
     }
-    if (stop.darkModeContrast.onAlt < 4.5) {
-      failures.push({
-        mode: 'Dark',
-        stop: stop.name,
-        bg: stop.background.dark.hex,
-        bgL: Math.round(stop.background.dark.hsl.l),
-        fg: stop.onAlt.dark.hex,
-        fgL: Math.round(stop.onAlt.dark.hsl.l),
-        fgType: 'on-alt',
-        ratio: stop.darkModeContrast.onAlt
-      });
+    if (!passesWCAG_AA(stop.darkModeContrast.onAlt)) {
+      failures.push(createFailure('Dark', palette.name, stop.name, stop.background.dark, stop.onAlt.dark, 'on-alt', stop.darkModeContrast.onAlt));
     }
   });
   
-  // Add failures summary at the top
-  report += `## ⚠️  FAILURES SUMMARY\n\n`;
+  // Generate failures summary
+  report += generateFailuresSummary(failures);
   
-  if (failures.length === 0) {
-    report += `✅ ALL COMBINATIONS PASS WCAG AA STANDARD (4.5:1)\n`;
-    report += `   No contrast issues found!\n\n`;
-  } else {
-    report += `Found ${failures.length} combinations that FAIL WCAG AA standard (4.5:1):\n\n`;
-    
-    failures.forEach(f => {
-      report += `❌ ${f.mode} Mode • ${palette.name}/${f.stop} (L:${f.bgL}%) → ${palette.name}/${f.stop}-${f.fgType} (L:${f.fgL}%)\n`;
-      report += `   Background: ${f.bg} → Foreground: ${f.fg}\n`;
-      report += `   Contrast: ${f.ratio.toFixed(2)}:1 (needs 4.5:1 minimum)\n\n`;
-    });
-  }
-  
-  report += `${"=".repeat(80)}\n\n`;
-  
-  report += `## LIGHT MODE\n\n`;
-  
-  palette.stops.forEach(stop => {
-    const bgL = Math.round(stop.background.light.hsl.l);
-    const onL = Math.round(stop.on.light.hsl.l);
-    const onAltL = Math.round(stop.onAlt.light.hsl.l);
-    
-    report += `### ${palette.name}/${stop.name} (L:${bgL}%)\n`;
-    report += `Background: ${stop.background.light.hex}\n\n`;
-    
-    // On color
-    const onRatio = stop.lightModeContrast.on;
-    const onStatus = onRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • ${palette.name}/${stop.name}-on (L:${onL}%) — ${stop.on.light.hex}\n`;
-    report += `    Contrast: ${onRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${onStatus}\n`;
-    if (onRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (onRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
-    
-    // On-alt color
-    const onAltRatio = stop.lightModeContrast.onAlt;
-    const onAltStatus = onAltRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • ${palette.name}/${stop.name}-on-alt (L:${onAltL}%) — ${stop.onAlt.light.hex}\n`;
-    report += `    Contrast: ${onAltRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${onAltStatus}\n`;
-    if (onAltRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (onAltRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
-  });
-  
+  // Generate detailed reports for each mode
+  report += generateModeReport('LIGHT MODE', palette, 'light');
   report += `\n${"=".repeat(80)}\n\n`;
-  report += `## DARK MODE\n\n`;
+  report += generateModeReport('DARK MODE', palette, 'dark');
   
-  palette.stops.forEach(stop => {
-    const bgL = Math.round(stop.background.dark.hsl.l);
-    const onL = Math.round(stop.on.dark.hsl.l);
-    const onAltL = Math.round(stop.onAlt.dark.hsl.l);
-    
-    report += `### ${palette.name}/${stop.name} (L:${bgL}%)\n`;
-    report += `Background: ${stop.background.dark.hex}\n\n`;
-    
-    // On color
-    const onRatio = stop.darkModeContrast.on;
-    const onStatus = onRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • ${palette.name}/${stop.name}-on (L:${onL}%) — ${stop.on.dark.hex}\n`;
-    report += `    Contrast: ${onRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${onStatus}\n`;
-    if (onRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (onRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
-    
-    // On-alt color
-    const onAltRatio = stop.darkModeContrast.onAlt;
-    const onAltStatus = onAltRatio >= 4.5 ? 'PASS' : 'FAIL';
-    report += `  • ${palette.name}/${stop.name}-on-alt (L:${onAltL}%) — ${stop.onAlt.dark.hex}\n`;
-    report += `    Contrast: ${onAltRatio.toFixed(2)}:1\n`;
-    report += `    Status: ${onAltStatus}\n`;
-    if (onAltRatio >= 7) report += `    Level: AAA ✓\n`;
-    else if (onAltRatio >= 4.5) report += `    Level: AA ✓\n`;
-    else report += `    Level: Does not meet WCAG standards\n`;
-    report += `\n`;
-  });
-  
-  report += `\n${"=".repeat(80)}\n\n`;
-  report += `## WCAG STANDARDS\n\n`;
-  report += `AA:  4.5:1 minimum (normal text), 3:1 (large text 18pt+)\n`;
-  report += `AAA: 7:1 minimum (normal text), 4.5:1 (large text 18pt+)\n`;
+  // Add footer
+  report += generateStandardsFooter();
   
   return report;
 }
 
 /**
- * Save content to file
+ * Create a contrast failure object
  */
-export function saveOpticsToFile(content: string, filepath: string): void {
-  const dir = path.dirname(filepath);
+function createFailure(
+  mode: string,
+  paletteName: string,
+  stopName: string,
+  background: { hex: string; hsl: { l: number } },
+  foreground: { hex: string; hsl: { l: number } },
+  fgType: string,
+  ratio: number
+): ContrastFailure {
+  return {
+    mode,
+    stop: `${paletteName}/${stopName}`,
+    background: background.hex,
+    backgroundLightness: Math.round(background.hsl.l),
+    foreground: foreground.hex,
+    foregroundLightness: Math.round(foreground.hsl.l),
+    foregroundType: fgType,
+    ratio,
+  };
+}
+
+/**
+ * Generate a detailed report for a specific mode
+ */
+function generateModeReport(
+  title: string,
+  palette: OpticsPalette,
+  mode: 'light' | 'dark'
+): string {
+  let report = `## ${title}\n\n`;
   
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  palette.stops.forEach(stop => {
+    const bg = mode === 'light' ? stop.background.light : stop.background.dark;
+    const on = mode === 'light' ? stop.on.light : stop.on.dark;
+    const onAlt = mode === 'light' ? stop.onAlt.light : stop.onAlt.dark;
+    const contrast = mode === 'light' ? stop.lightModeContrast : stop.darkModeContrast;
+    
+    const bgL = Math.round(bg.hsl.l);
+    const onL = Math.round(on.hsl.l);
+    const onAltL = Math.round(onAlt.hsl.l);
+    
+    report += `### ${palette.name}/${stop.name} (L:${bgL}%)\n`;
+    report += `Background: ${bg.hex}\n\n`;
+    
+    // On color
+    const onEntry: ContrastEntry = {
+      label: `${palette.name}/${stop.name}-on (L:${onL}%)`,
+      hex: on.hex,
+      lightness: onL,
+      ratio: contrast.on,
+    };
+    report += generateContrastEntry(onEntry);
+    
+    // On-alt color
+    const onAltEntry: ContrastEntry = {
+      label: `${palette.name}/${stop.name}-on-alt (L:${onAltL}%)`,
+      hex: onAlt.hex,
+      lightness: onAltL,
+      ratio: contrast.onAlt,
+    };
+    report += generateContrastEntry(onAltEntry);
+  });
   
-  fs.writeFileSync(filepath, content, 'utf-8');
+  return report;
 }
 
 /**
@@ -332,9 +240,9 @@ export function exportOpticsAll(palette: OpticsPalette, outputDir: string): {
   const figmaDarkContent = exportOpticsToFigma(palette, 'Dark');
   const contrastReportContent = exportOpticsContrastReport(palette);
   
-  saveOpticsToFile(figmaLightContent, figmaLightPath);
-  saveOpticsToFile(figmaDarkContent, figmaDarkPath);
-  saveOpticsToFile(contrastReportContent, contrastReportPath);
+  saveToFile(figmaLightContent, figmaLightPath);
+  saveToFile(figmaDarkContent, figmaDarkPath);
+  saveToFile(contrastReportContent, contrastReportPath);
   
   return {
     figmaLight: figmaLightPath,

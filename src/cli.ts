@@ -3,9 +3,24 @@
 import { Command } from 'commander';
 import { generatePalette } from './generator';
 import { generateOpticsPalette } from './optics-generator';
-import { exportAll, saveToFile } from './exporter';
-import { exportOpticsAll, exportOpticsToFigma, saveOpticsToFile } from './optics-exporter';
+import { exportAll } from './exporter';
+import { exportOpticsAll, exportOpticsToFigma } from './optics-exporter';
 import * as path from 'path';
+import { saveToFile } from './file-utils';
+import {
+  printPaletteSummary,
+  printBaseColorInfo,
+  printContrastAnalysisHeader,
+  printSampleContrastHeader,
+  printContrastLine,
+  printOpticsContrastSample,
+  printExportHeader,
+  printFileExport,
+  printCompletion,
+  printFigmaInstructions,
+  printError,
+  printAnalysisResult,
+} from './console-utils';
 
 const program = new Command();
 
@@ -25,104 +40,13 @@ program
   .option('--optics', 'Generate using Optics scale format (19 stops with light-dark mode)')
   .action((color: string, options) => {
     try {
-      console.log('🎨 OpticsThemeBuilder\n');
-      console.log(`Generating palette from color: ${color}`);
-      console.log(`Palette name: ${options.name}`);
-      
-      // Check if Optics format is requested
       if (options.optics) {
-        console.log(`Format: Optics scale (19 stops with light/dark modes)\n`);
-        
-        // Generate Optics palette
-        const opticsPalette = generateOpticsPalette(color, options.name);
-        
-        console.log(`✅ Generated ${opticsPalette.stops.length} Optics color stops`);
-        console.log(`   Base color: ${opticsPalette.baseColor.hex}`);
-        console.log(`   H: ${Math.round(opticsPalette.baseColor.h)}° S: ${Math.round(opticsPalette.baseColor.s)}% L: ${Math.round(opticsPalette.baseColor.l)}%\n`);
-        
-        // Display contrast information for a few key stops
-        console.log('📊 Contrast Analysis (sample):');
-        const sampleStops = ['plus-max', 'base', 'minus-max'];
-        opticsPalette.stops.filter(s => sampleStops.includes(s.name)).forEach((stop) => {
-          console.log(`   ${stop.name.padEnd(12)}: Light ${stop.background.light.hex} → on:${stop.lightModeContrast.on.toFixed(1)} alt:${stop.lightModeContrast.onAlt.toFixed(1)}`);
-          console.log(`   ${' '.repeat(12)}  Dark  ${stop.background.dark.hex} → on:${stop.darkModeContrast.on.toFixed(1)} alt:${stop.darkModeContrast.onAlt.toFixed(1)}`);
-        });
-        
-        console.log('\n📦 Exporting Figma files...');
-        
-        const outputDir = options.output;
-        const mode = options.mode.toLowerCase();
-        
-        if (mode === 'both') {
-          const files = exportOpticsAll(opticsPalette, outputDir);
-          console.log(`   ✓ Figma Variables (Light): ${path.basename(files.figmaLight)}`);
-          console.log(`   ✓ Figma Variables (Dark): ${path.basename(files.figmaDark)}`);
-          console.log(`   ✓ Contrast Report: ${path.basename(files.contrastReport)}`);
-        } else if (mode === 'light') {
-          const filepath = path.join(outputDir, `${opticsPalette.name}-light.tokens.json`);
-          const contrastReportPath = path.join(outputDir, `${opticsPalette.name}-contrast-report.txt`);
-          const content = exportOpticsToFigma(opticsPalette, 'Light');
-          saveOpticsToFile(content, filepath);
-          console.log(`   ✓ Figma Variables (Light): ${path.basename(filepath)}`);
-          console.log(`   ✓ Contrast Report: ${path.basename(contrastReportPath)}`);
-        } else if (mode === 'dark') {
-          const filepath = path.join(outputDir, `${opticsPalette.name}-dark.tokens.json`);
-          const contrastReportPath = path.join(outputDir, `${opticsPalette.name}-contrast-report.txt`);
-          const content = exportOpticsToFigma(opticsPalette, 'Dark');
-          saveOpticsToFile(content, filepath);
-          console.log(`   ✓ Figma Variables (Dark): ${path.basename(filepath)}`);
-          console.log(`   ✓ Contrast Report: ${path.basename(contrastReportPath)}`);
-        } else {
-          console.error(`❌ Error: Invalid mode "${mode}". Use: light, dark, or both`);
-          process.exit(1);
-        }
-        
-        console.log('\n✨ Done! Your Optics palette is ready.\n');
-        console.log('💡 Tip: Import each .tokens.json file into Figma Variables panel');
-        console.log('   1. Open Figma → Variables panel');
-        console.log('   2. Import Light mode file, then Dark mode file');
-        console.log('   3. Figma will automatically create a variable collection with both modes');
-        
+        handleOpticsGeneration(color, options);
       } else {
-        // Original palette generation
-        console.log(`Stops: ${options.stops}\n`);
-        
-        const stops = parseInt(options.stops, 10);
-        if (isNaN(stops) || stops < 2 || stops > 100) {
-          console.error('❌ Error: Stops must be a number between 2 and 100');
-          process.exit(1);
-        }
-
-        // Generate palette
-        const palette = generatePalette(color, options.name, stops);
-
-        console.log(`✅ Generated ${palette.stops.length} color stops`);
-        console.log(`   Base color: ${palette.baseColor.hex}\n`);
-
-        // Display contrast information
-        console.log('📊 Contrast Analysis:');
-        palette.stops.forEach((stop) => {
-          const recommended = stop.recommendedForeground;
-          const lightPass = stop.foregrounds.light.wcagAA ? '✓' : '✗';
-          const darkPass = stop.foregrounds.dark.wcagAA ? '✓' : '✗';
-          
-          console.log(`   Stop ${String(stop.stop).padStart(2)}: ${stop.background.hex} → ${recommended === 'light' ? 'Light' : 'Dark'} (L:${lightPass} ${stop.foregrounds.light.contrast.toFixed(1)} D:${darkPass} ${stop.foregrounds.dark.contrast.toFixed(1)})`);
-        });
-
-        console.log('\n📦 Exporting Figma files...');
-
-        // Export files
-        const outputDir = options.output;
-        const files = exportAll(palette, outputDir);
-        
-        console.log(`   ✓ Figma Variables: ${path.basename(files.figma)}`);
-        console.log(`   ✓ Contrast Report: ${path.basename(files.contrastReport)}`);
-
-        console.log('\n✨ Done! Your palette is ready.\n');
-        console.log('💡 Tip: Import the .json file into Figma Variables panel');
+        handleStandardGeneration(color, options);
       }
     } catch (error) {
-      console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`);
+      printError(error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
   });
@@ -134,7 +58,7 @@ program
   .argument('<foreground>', 'Foreground color')
   .action((background: string, foreground: string) => {
     try {
-      const { hsl, rgb, formatHex, converter } = require('culori');
+      const { converter, formatHex } = require('culori');
       const { getContrastRatio, meetsWCAG_AA, meetsWCAG_AAA } = require('./contrast');
       
       const toRgb = converter('rgb');
@@ -143,7 +67,7 @@ program
       const fg = toRgb(foreground);
       
       if (!bg || !fg) {
-        console.error('❌ Error: Invalid color format');
+        printError('Invalid color format');
         process.exit(1);
       }
       
@@ -153,17 +77,135 @@ program
       const aa = meetsWCAG_AA(contrast);
       const aaa = meetsWCAG_AAA(contrast);
       
-      console.log('\n🔍 Contrast Analysis\n');
-      console.log(`   Background: ${bgHex}`);
-      console.log(`   Foreground: ${fgHex}`);
-      console.log(`   Contrast Ratio: ${contrast.toFixed(2)}:1\n`);
-      console.log(`   WCAG AA (4.5:1):  ${aa ? '✅ Pass' : '❌ Fail'}`);
-      console.log(`   WCAG AAA (7:1):   ${aaa ? '✅ Pass' : '❌ Fail'}\n`);
-      
+      printAnalysisResult(bgHex, fgHex, contrast, aa, aaa);
     } catch (error) {
-      console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`);
+      printError(error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
   });
+
+/**
+ * Handle Optics palette generation
+ */
+function handleOpticsGeneration(color: string, options: any): void {
+  printPaletteSummary(color, options.name, 'Optics scale (19 stops with light/dark modes)');
+  
+  // Generate Optics palette
+  const opticsPalette = generateOpticsPalette(color, options.name);
+  
+  printBaseColorInfo(
+    opticsPalette.stops.length,
+    opticsPalette.baseColor.hex,
+    opticsPalette.baseColor.h,
+    opticsPalette.baseColor.s,
+    opticsPalette.baseColor.l
+  );
+  
+  // Display contrast information for key stops
+  printSampleContrastHeader();
+  const sampleStops = ['plus-max', 'base', 'minus-max'];
+  opticsPalette.stops
+    .filter(s => sampleStops.includes(s.name))
+    .forEach((stop) => {
+      printOpticsContrastSample(
+        stop.name,
+        'light',
+        stop.background.light.hex,
+        stop.lightModeContrast.on,
+        stop.lightModeContrast.onAlt
+      );
+      printOpticsContrastSample(
+        '',
+        'dark',
+        stop.background.dark.hex,
+        stop.darkModeContrast.on,
+        stop.darkModeContrast.onAlt
+      );
+    });
+  
+  printExportHeader();
+  
+  const outputDir = options.output;
+  const mode = options.mode.toLowerCase();
+  
+  exportOpticsFiles(opticsPalette, outputDir, mode);
+  
+  printCompletion('Optics');
+  printFigmaInstructions(mode === 'both');
+}
+
+/**
+ * Handle standard palette generation
+ */
+function handleStandardGeneration(color: string, options: any): void {
+  const stops = parseInt(options.stops, 10);
+  
+  if (isNaN(stops) || stops < 2 || stops > 100) {
+    printError('Stops must be a number between 2 and 100');
+    process.exit(1);
+  }
+  
+  printPaletteSummary(color, options.name, stops);
+  
+  // Generate palette
+  const palette = generatePalette(color, options.name, stops);
+  
+  printBaseColorInfo(palette.stops.length, palette.baseColor.hex);
+  
+  // Display contrast information
+  printContrastAnalysisHeader();
+  palette.stops.forEach((stop) => {
+    const recommended = stop.recommendedForeground === 'light' ? 'Light' : 'Dark';
+    const lightPass = stop.foregrounds.light.wcagAA ? '✓' : '✗';
+    const darkPass = stop.foregrounds.dark.wcagAA ? '✓' : '✗';
+    
+    printContrastLine(
+      stop.stop,
+      stop.background.hex,
+      recommended,
+      lightPass,
+      stop.foregrounds.light.contrast,
+      darkPass,
+      stop.foregrounds.dark.contrast
+    );
+  });
+  
+  printExportHeader();
+  
+  // Export files
+  const outputDir = options.output;
+  const files = exportAll(palette, outputDir);
+  
+  printFileExport('Figma Variables', path.basename(files.figma));
+  printFileExport('Contrast Report', path.basename(files.contrastReport));
+  
+  printCompletion();
+  printFigmaInstructions(false);
+}
+
+/**
+ * Export Optics files based on mode selection
+ */
+function exportOpticsFiles(palette: any, outputDir: string, mode: string): void {
+  if (mode === 'both') {
+    const files = exportOpticsAll(palette, outputDir);
+    printFileExport('Figma Variables (Light)', path.basename(files.figmaLight));
+    printFileExport('Figma Variables (Dark)', path.basename(files.figmaDark));
+    printFileExport('Contrast Report', path.basename(files.contrastReport));
+  } else if (mode === 'light' || mode === 'dark') {
+    const modeCapitalized = mode.charAt(0).toUpperCase() + mode.slice(1);
+    const filepath = path.join(outputDir, `${palette.name}-${mode}.tokens.json`);
+    const contrastReportPath = path.join(outputDir, `${palette.name}-contrast-report.txt`);
+    
+    const content = exportOpticsToFigma(palette, modeCapitalized as 'Light' | 'Dark');
+    saveToFile(content, filepath);
+    
+    printFileExport(`Figma Variables (${modeCapitalized})`, path.basename(filepath));
+    printFileExport('Contrast Report', path.basename(contrastReportPath));
+  } else {
+    printError(`Invalid mode "${mode}". Use: light, dark, or both`);
+    process.exit(1);
+  }
+}
 
 program.parse();
