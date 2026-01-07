@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { palette } from '../stores/palette';
+  import { colorTypes } from '../stores/color-types';
   import { parseBaseColor } from '../utils/colors';
   import * as culori from 'culori';
   import styles from './Controls.module.css';
 
-  let colorPickerValue = $palette.baseColor;
-  let hInput = Math.round($palette.h);
-  let sInput = Math.round($palette.s);
-  let nameInput = $palette.name;
+  let colorPickerValue = '#3b82f6';
+  let hInput = 217;
+  let sInput = 91;
 
   // Sync color picker display with HSL values
   $: {
@@ -29,50 +28,40 @@
     hInput = Math.max(0, Math.min(360, hInput));
     sInput = Math.max(0, Math.min(100, sInput));
   }
-
-  function handleGenerate() {
-    const hslColor = culori.hsl({ h: hInput, s: sInput / 100, l: 0.5 });
-    const hexColor = culori.formatHex(hslColor);
-    
-    palette.setBaseColor(hexColor, hInput, sInput);
-    palette.setName(nameInput);
-  }
-
-  function handleModeChange(mode: 'light' | 'dark') {
-    palette.setMode(mode);
-  }
 </script>
 
 <div class={styles.controls}>
-  <input 
-    type="color" 
-    class={styles.colorInput}
-    value={colorPickerValue}
-    on:input={handleColorPickerChange}
-  />
-  <div class={styles.hslInputs}>
-    <label class={styles.hslLabel}>
-      H:
-      <input 
-        type="number" 
-        class={styles.numberInput}
-        min="0" 
-        max="360" 
-        bind:value={hInput}
-        on:input={handleHSLInput}
-      />
-    </label>
-    <label class={styles.hslLabel}>
-      S:
-      <input 
-        type="number" 
-        class={styles.numberInput}
-        min="0" 
-        max="100" 
-        bind:value={sInput}
-        on:input={handleHSLInput}
-      />
-    </label>
+  <div class={styles.label}>Base Color</div>
+  <div class={styles.controlsRow}>
+    <input 
+      type="color" 
+      class={styles.colorInput}
+      value={colorPickerValue}
+      on:input={handleColorPickerChange}
+    />
+    <div class={styles.hslInputs}>
+      <label class={styles.hslLabel}>
+        H:
+        <input 
+          type="number" 
+          class={styles.numberInput}
+          min="0" 
+          max="360" 
+          bind:value={hInput}
+          on:input={handleHSLInput}
+        />
+      </label>
+      <label class={styles.hslLabel}>
+        S:
+        <input 
+          type="number" 
+          class={styles.numberInput}
+          min="0" 
+          max="100" 
+          bind:value={sInput}
+          on:input={handleHSLInput}
+        />
+      </label>
+    </div>
   </div>
-  <button class={styles.button} on:click={handleGenerate}>Generate Palette</button>
 </div>

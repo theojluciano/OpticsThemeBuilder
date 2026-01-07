@@ -1,76 +1,56 @@
 .controls {
-  display: inline-flex;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  height: 100px;
-  padding-inline: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   flex: 1;
-  justify-content: space-between;
+}
+
+.label {
+  font-weight: 500;
+  color: #e5e5e5;
+  font-size: 14px;
+}
+
+.controlsRow {
+  display: flex;
+  gap: 12px;
   align-items: center;
-}
-
-.colorInput {
-  width: 60px;
-  height: 60px;
-  border: 1px solid #444;
-  border-radius: 8px;
-  background: #0f0f0f;
-  cursor: pointer;
-}
-
-.colorInput::-webkit-color-swatch-wrapper {
-  padding: 4px;
-}
-
-.colorInput::-webkit-color-swatch {
-  border: 1px solid #666;
-  border-radius: 4px;
 }
 
 .hslInputs {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 12px;
+  flex: 1;
 }
 
 .hslLabel {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-width: auto;
+  gap: 8px;
+  font-weight: 500;
+  color: #e5e5e5;
   font-size: 14px;
-  color: #888;
+  flex: 1;
 }
 
 .numberInput {
-  width: 65px;
-  padding: 6px 8px;
+  flex: 1;
+  padding: 10px 12px;
   background: #0f0f0f;
   border: 1px solid #444;
   border-radius: 8px;
   color: #e5e5e5;
   font-size: 14px;
-  height: 40px;
+  min-width: 0;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
 .numberInput:focus {
-  outline: none;
   border-color: #3b82f6;
 }
 
-.button {
-  padding: 8px 20px;
-  background: #3b82f6;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 14px;
-  height: 40px;
-}
-
-.button:hover {
-  background: #2563eb;
+.numberInput::-webkit-inner-spin-button,
+.numberInput::-webkit-outer-spin-button {
+  opacity: 1;
 }

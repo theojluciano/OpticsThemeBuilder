@@ -1,20 +1,12 @@
 <script lang="ts">
-  import Controls from './lib/components/Controls.svelte';
-  import Summary from './lib/components/Summary.svelte';
-  import ColorStopCard from './lib/components/ColorStopCard.svelte';
+  import ColorTypeSection from './lib/components/ColorTypeSection.svelte';
+  import AddCustomColorType from './lib/components/AddCustomColorType.svelte';
   import Export from './lib/components/Export.svelte';
-  import { OPTICS_STOPS } from './lib/data/defaults';
-  import { palette } from './lib/stores/palette';
+  import { colorTypes } from './lib/stores/color-types';
   import styles from './App.module.css';
 
-  let nameInput = $palette.name;
-
   function handleModeChange(mode: 'light' | 'dark') {
-    palette.setMode(mode);
-  }
-
-  function handleNameChange() {
-    palette.setName(nameInput);
+    colorTypes.setMode(mode);
   }
 </script>
 
@@ -24,52 +16,34 @@
       <div class={styles.logoContainer}>
         <img src="/logo.svg" alt="Bifrost Logo" class={styles.logo} />
       </div>
-      <Controls />
+      <div class={styles.headerControls}>
+        <div class={styles.toggle}>
+          <button 
+            class={$colorTypes.mode === 'light' ? styles.active : ''}
+            on:click={() => handleModeChange('light')}
+            title="Light mode"
+          >
+            <i class="ph-sun-bold"></i>
+          </button>
+          <button 
+            class={$colorTypes.mode === 'dark' ? styles.active : ''}
+            on:click={() => handleModeChange('dark')}
+            title="Dark mode"
+          >
+            <i class="ph-moon-bold"></i>
+          </button>
+        </div>
+        
+        <Export />
+      </div>
     </div>
   </header>
 
-  <div class={styles.configSection}>
-    <div class={styles.configRow}>
-      <label>
-        Palette Name
-        <input 
-          type="text" 
-          bind:value={nameInput} 
-          on:change={handleNameChange} 
-          placeholder="primary"
-          name="palette-name"
-        />
-      </label>
-    </div>
-
-    <div class={styles.configRow}>
-      <label>
-        Mode
-        <div class={styles.toggle}>
-          <button 
-            class={$palette.mode === 'light' ? styles.active : ''}
-            on:click={() => handleModeChange('light')}
-          >
-            Light
-          </button>
-          <button 
-            class={$palette.mode === 'dark' ? styles.active : ''}
-            on:click={() => handleModeChange('dark')}
-          >
-            Dark
-          </button>
-        </div>
-      </label>
-    </div>
-  </div>
-
-  <Summary />
-
-  <div class={styles.grid}>
-    {#each OPTICS_STOPS as stop}
-      <ColorStopCard {stop} />
+  <div class={styles.colorTypesContainer}>
+    {#each $colorTypes.colorTypes as colorType (colorType.id)}
+      <ColorTypeSection {colorType} />
     {/each}
+    
+    <AddCustomColorType />
   </div>
-
-  <Export />
 </div>

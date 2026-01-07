@@ -1,19 +1,33 @@
 <script lang="ts">
-  import { palette } from '../stores/palette';
+  import { colorTypes } from '../stores/color-types';
   import { makeColor, getContrast } from '../utils/colors';
   import type { OpticsStopName } from '../data/defaults';
   import styles from './ColorStopCard.module.css';
 
   export let stop: OpticsStopName;
+  export let colorTypeId: string;
 
-  $: mode = $palette.mode;
-  $: bgValue = mode === 'light' ? $palette.lightBg[stop] : $palette.darkBg[stop];
-  $: onValue = mode === 'light' ? $palette.lightOn[stop] : $palette.darkOn[stop];
-  $: onAltValue = mode === 'light' ? $palette.lightOnAlt[stop] : $palette.darkOnAlt[stop];
+  $: colorType = $colorTypes.colorTypes.find(ct => ct.id === colorTypeId);
+  $: mode = $colorTypes.mode;
+  
+  $: bgValue = colorType && mode === 'light' 
+    ? colorType.lightBg[stop] 
+    : colorType?.darkBg[stop] ?? 0;
+  
+  $: onValue = colorType && mode === 'light' 
+    ? colorType.lightOn[stop] 
+    : colorType?.darkOn[stop] ?? 0;
+  
+  $: onAltValue = colorType && mode === 'light' 
+    ? colorType.lightOnAlt[stop] 
+    : colorType?.darkOnAlt[stop] ?? 0;
 
-  $: bgColor = makeColor($palette.h, $palette.s, bgValue);
-  $: onColor = makeColor($palette.h, $palette.s, onValue);
-  $: onAltColor = makeColor($palette.h, $palette.s, onAltValue);
+  $: h = colorType?.h ?? 0;
+  $: s = colorType?.s ?? 0;
+
+  $: bgColor = makeColor(h, s, bgValue);
+  $: onColor = makeColor(h, s, onValue);
+  $: onAltColor = makeColor(h, s, onAltValue);
 
   $: onContrast = getContrast(bgColor, onColor);
   $: onAltContrast = getContrast(bgColor, onAltColor);
@@ -32,8 +46,8 @@
   
   <div class={styles.preview} style="background: {bgColor}; color: {textColor};">
     <div class={styles.hslDisplay}>
-      <div>H: {Math.round($palette.h)}°</div>
-      <div>S: {Math.round($palette.s)}%</div>
+      <div>H: {Math.round(h)}°</div>
+      <div>S: {Math.round(s)}%</div>
       <div>L: {bgValue}%</div>
     </div>
   </div>
@@ -49,7 +63,7 @@
       min="0" 
       max="100" 
       value={bgValue}
-      on:input={(e) => palette.updateBg(stop, +e.currentTarget.value)}
+      on:input={(e) => colorTypes.updateBg(colorTypeId, stop, +e.currentTarget.value)}
     />
   </div>
 
@@ -64,7 +78,7 @@
       min="0" 
       max="100" 
       value={onValue}
-      on:input={(e) => palette.updateOn(stop, +e.currentTarget.value)}
+      on:input={(e) => colorTypes.updateOn(colorTypeId, stop, +e.currentTarget.value)}
     />
   </div>
 
@@ -79,19 +93,19 @@
       min="0" 
       max="100" 
       value={onAltValue}
-      on:input={(e) => palette.updateOnAlt(stop, +e.currentTarget.value)}
+      on:input={(e) => colorTypes.updateOnAlt(colorTypeId, stop, +e.currentTarget.value)}
     />
   </div>
 
   <div class={styles.tests}>
     <div class={`${styles.test} ${onPass ? styles.pass : styles.fail}`}>
-      <span>on (H:{Math.round($palette.h)}° S:{Math.round($palette.s)}% L:{onValue}%)</span>
+      <span>on (H:{Math.round(h)}° S:{Math.round(s)}% L:{onValue}%)</span>
       <span class={`${styles.value} ${onPass ? styles.pass : styles.fail}`}>
         {onContrast.toFixed(2)}:1
       </span>
     </div>
     <div class={`${styles.test} ${onAltPass ? styles.pass : styles.fail}`}>
-      <span>on-alt (H:{Math.round($palette.h)}° S:{Math.round($palette.s)}% L:{onAltValue}%)</span>
+      <span>on-alt (H:{Math.round(h)}° S:{Math.round(s)}% L:{onAltValue}%)</span>
       <span class={`${styles.value} ${onAltPass ? styles.pass : styles.fail}`}>
         {onAltContrast.toFixed(2)}:1
       </span>
