@@ -24,7 +24,7 @@
   $: textColor = bgValue > 50 ? '#000' : '#fff';
 </script>
 
-<div class={styles.card} class:fail={hasFailure}>
+<div class={`${styles.card} ${hasFailure ? styles.fail : ''}`}>
   <div class={styles.header}>
     <span class={styles.name}>{stop}</span>
     <span class={styles.lightness}>L: {bgValue}%</span>
@@ -84,15 +84,15 @@
   </div>
 
   <div class={styles.tests}>
-    <div class={styles.test} class:pass={onPass} class:fail={!onPass}>
+    <div class={`${styles.test} ${onPass ? styles.pass : styles.fail}`}>
       <span>on (H:{Math.round($palette.h)}° S:{Math.round($palette.s)}% L:{onValue}%)</span>
-      <span class={styles.value} class:pass={onPass} class:fail={!onPass}>
+      <span class={`${styles.value} ${onPass ? styles.pass : styles.fail}`}>
         {onContrast.toFixed(2)}:1
       </span>
     </div>
-    <div class={styles.test} class:pass={onAltPass} class:fail={!onAltPass}>
+    <div class={`${styles.test} ${onAltPass ? styles.pass : styles.fail}`}>
       <span>on-alt (H:{Math.round($palette.h)}° S:{Math.round($palette.s)}% L:{onAltValue}%)</span>
-      <span class={styles.value} class:pass={onAltPass} class:fail={!onAltPass}>
+      <span class={`${styles.value} ${onAltPass ? styles.pass : styles.fail}`}>
         {onAltContrast.toFixed(2)}:1
       </span>
     </div>
