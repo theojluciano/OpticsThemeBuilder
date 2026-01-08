@@ -1,21 +1,27 @@
+/* Export Component - Optics Design System */
+
 .exportButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: #3b82f6;
+  gap: var(--op-space-x-small);
+  padding: var(--op-space-x-small) var(--op-space-large);
+  background: var(--op-interactive-primary);
   border: none;
-  border-radius: 6px;
-  color: white;
-  font-weight: 400;
-  font-size: 14px;
+  border-radius: var(--op-radius-md);
+  color: var(--op-text-inverse);
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-size-base);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--op-transition-base);
   white-space: nowrap;
 }
 
 .exportButton:hover {
-  background: #2563eb;
+  background: var(--op-interactive-primary-hover);
+}
+
+.exportButton:active {
+  background: var(--op-interactive-primary-active);
 }
 
 .figmaIcon {

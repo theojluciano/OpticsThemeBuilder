@@ -1,0 +1,209 @@
+/* Optics Design System Tokens */
+/* Generated color palettes using the Optics format */
+
+:root {
+  color-scheme: light dark;
+  
+  /* ============================================
+     PRIMARY COLOR SCALE (Blue)
+     ============================================ */
+  --op-color-primary-h: 217;
+  --op-color-primary-s: 91%;
+  
+  /* Primary stops */
+  --op-color-primary-plus-max: light-dark(hsl(217 91% 98%), hsl(217 91% 8%));
+  --op-color-primary-plus-eight: light-dark(hsl(217 91% 96%), hsl(217 91% 10%));
+  --op-color-primary-plus-seven: light-dark(hsl(217 91% 94%), hsl(217 91% 12%));
+  --op-color-primary-plus-six: light-dark(hsl(217 91% 90%), hsl(217 91% 16%));
+  --op-color-primary-plus-five: light-dark(hsl(217 91% 84%), hsl(217 91% 20%));
+  --op-color-primary-plus-four: light-dark(hsl(217 91% 70%), hsl(217 91% 24%));
+  --op-color-primary-plus-three: light-dark(hsl(217 91% 64%), hsl(217 91% 28%));
+  --op-color-primary-plus-two: light-dark(hsl(217 91% 55%), hsl(217 91% 32%));
+  --op-color-primary-plus-one: light-dark(hsl(217 91% 48%), hsl(217 91% 36%));
+  --op-color-primary-base: light-dark(hsl(217 91% 42%), hsl(217 91% 40%));
+  --op-color-primary-minus-one: light-dark(hsl(217 91% 38%), hsl(217 91% 45%));
+  --op-color-primary-minus-two: light-dark(hsl(217 91% 34%), hsl(217 91% 50%));
+  --op-color-primary-minus-three: light-dark(hsl(217 91% 30%), hsl(217 91% 56%));
+  --op-color-primary-minus-four: light-dark(hsl(217 91% 26%), hsl(217 91% 62%));
+  --op-color-primary-minus-five: light-dark(hsl(217 91% 22%), hsl(217 91% 68%));
+  --op-color-primary-minus-six: light-dark(hsl(217 91% 18%), hsl(217 91% 75%));
+  --op-color-primary-minus-seven: light-dark(hsl(217 91% 12%), hsl(217 91% 82%));
+  --op-color-primary-minus-eight: light-dark(hsl(217 91% 8%), hsl(217 91% 90%));
+  --op-color-primary-minus-max: light-dark(hsl(217 91% 4%), hsl(217 91% 96%));
+  
+  /* ============================================
+     NEUTRAL COLOR SCALE (Gray)
+     ============================================ */
+  --op-color-neutral-h: 220;
+  --op-color-neutral-s: 8%;
+  
+  /* Neutral stops */
+  --op-color-neutral-plus-max: light-dark(hsl(220 8% 98%), hsl(220 8% 6%));
+  --op-color-neutral-plus-eight: light-dark(hsl(220 8% 96%), hsl(220 8% 8%));
+  --op-color-neutral-plus-seven: light-dark(hsl(220 8% 94%), hsl(220 8% 10%));
+  --op-color-neutral-plus-six: light-dark(hsl(220 8% 90%), hsl(220 8% 12%));
+  --op-color-neutral-plus-five: light-dark(hsl(220 8% 84%), hsl(220 8% 15%));
+  --op-color-neutral-plus-four: light-dark(hsl(220 8% 76%), hsl(220 8% 18%));
+  --op-color-neutral-plus-three: light-dark(hsl(220 8% 68%), hsl(220 8% 22%));
+  --op-color-neutral-plus-two: light-dark(hsl(220 8% 60%), hsl(220 8% 26%));
+  --op-color-neutral-plus-one: light-dark(hsl(220 8% 52%), hsl(220 8% 30%));
+  --op-color-neutral-base: light-dark(hsl(220 8% 45%), hsl(220 8% 45%));
+  --op-color-neutral-minus-one: light-dark(hsl(220 8% 38%), hsl(220 8% 52%));
+  --op-color-neutral-minus-two: light-dark(hsl(220 8% 32%), hsl(220 8% 60%));
+  --op-color-neutral-minus-three: light-dark(hsl(220 8% 28%), hsl(220 8% 68%));
+  --op-color-neutral-minus-four: light-dark(hsl(220 8% 24%), hsl(220 8% 76%));
+  --op-color-neutral-minus-five: light-dark(hsl(220 8% 20%), hsl(220 8% 84%));
+  --op-color-neutral-minus-six: light-dark(hsl(220 8% 16%), hsl(220 8% 90%));
+  --op-color-neutral-minus-seven: light-dark(hsl(220 8% 10%), hsl(220 8% 94%));
+  --op-color-neutral-minus-eight: light-dark(hsl(220 8% 6%), hsl(220 8% 96%));
+  --op-color-neutral-minus-max: light-dark(hsl(220 8% 2%), hsl(220 8% 98%));
+  
+  /* ============================================
+     SUCCESS COLOR SCALE (Green)
+     ============================================ */
+  --op-color-success-h: 158;
+  --op-color-success-s: 64%;
+  
+  /* Success stops */
+  --op-color-success-plus-max: light-dark(hsl(158 64% 98%), hsl(158 64% 8%));
+  --op-color-success-plus-eight: light-dark(hsl(158 64% 96%), hsl(158 64% 10%));
+  --op-color-success-plus-seven: light-dark(hsl(158 64% 94%), hsl(158 64% 12%));
+  --op-color-success-plus-six: light-dark(hsl(158 64% 90%), hsl(158 64% 16%));
+  --op-color-success-plus-five: light-dark(hsl(158 64% 84%), hsl(158 64% 20%));
+  --op-color-success-plus-four: light-dark(hsl(158 64% 70%), hsl(158 64% 24%));
+  --op-color-success-plus-three: light-dark(hsl(158 64% 64%), hsl(158 64% 28%));
+  --op-color-success-plus-two: light-dark(hsl(158 64% 55%), hsl(158 64% 32%));
+  --op-color-success-plus-one: light-dark(hsl(158 64% 48%), hsl(158 64% 36%));
+  --op-color-success-base: light-dark(hsl(158 64% 42%), hsl(158 64% 40%));
+  --op-color-success-minus-one: light-dark(hsl(158 64% 38%), hsl(158 64% 45%));
+  --op-color-success-minus-two: light-dark(hsl(158 64% 34%), hsl(158 64% 50%));
+  --op-color-success-minus-three: light-dark(hsl(158 64% 30%), hsl(158 64% 56%));
+  --op-color-success-minus-four: light-dark(hsl(158 64% 26%), hsl(158 64% 62%));
+  --op-color-success-minus-five: light-dark(hsl(158 64% 22%), hsl(158 64% 68%));
+  --op-color-success-minus-six: light-dark(hsl(158 64% 18%), hsl(158 64% 75%));
+  --op-color-success-minus-seven: light-dark(hsl(158 64% 12%), hsl(158 64% 82%));
+  --op-color-success-minus-eight: light-dark(hsl(158 64% 8%), hsl(158 64% 90%));
+  --op-color-success-minus-max: light-dark(hsl(158 64% 4%), hsl(158 64% 96%));
+  
+  /* ============================================
+     DANGER COLOR SCALE (Red)
+     ============================================ */
+  --op-color-danger-h: 0;
+  --op-color-danger-s: 84%;
+  
+  /* Danger stops */
+  --op-color-danger-plus-max: light-dark(hsl(0 84% 98%), hsl(0 84% 8%));
+  --op-color-danger-plus-eight: light-dark(hsl(0 84% 96%), hsl(0 84% 10%));
+  --op-color-danger-plus-seven: light-dark(hsl(0 84% 94%), hsl(0 84% 12%));
+  --op-color-danger-plus-six: light-dark(hsl(0 84% 90%), hsl(0 84% 16%));
+  --op-color-danger-plus-five: light-dark(hsl(0 84% 84%), hsl(0 84% 20%));
+  --op-color-danger-plus-four: light-dark(hsl(0 84% 70%), hsl(0 84% 24%));
+  --op-color-danger-plus-three: light-dark(hsl(0 84% 64%), hsl(0 84% 28%));
+  --op-color-danger-plus-two: light-dark(hsl(0 84% 55%), hsl(0 84% 32%));
+  --op-color-danger-plus-one: light-dark(hsl(0 84% 48%), hsl(0 84% 36%));
+  --op-color-danger-base: light-dark(hsl(0 84% 42%), hsl(0 84% 40%));
+  --op-color-danger-minus-one: light-dark(hsl(0 84% 38%), hsl(0 84% 45%));
+  --op-color-danger-minus-two: light-dark(hsl(0 84% 34%), hsl(0 84% 50%));
+  --op-color-danger-minus-three: light-dark(hsl(0 84% 30%), hsl(0 84% 56%));
+  --op-color-danger-minus-four: light-dark(hsl(0 84% 26%), hsl(0 84% 62%));
+  --op-color-danger-minus-five: light-dark(hsl(0 84% 22%), hsl(0 84% 68%));
+  --op-color-danger-minus-six: light-dark(hsl(0 84% 18%), hsl(0 84% 75%));
+  --op-color-danger-minus-seven: light-dark(hsl(0 84% 12%), hsl(0 84% 82%));
+  --op-color-danger-minus-eight: light-dark(hsl(0 84% 8%), hsl(0 84% 90%));
+  --op-color-danger-minus-max: light-dark(hsl(0 84% 4%), hsl(0 84% 96%));
+  
+  /* ============================================
+     SEMANTIC TOKENS
+     ============================================ */
+  
+  /* Surface tokens - Dark theme */
+  --op-surface-base: #0f0f0f;
+  --op-surface-raised: #1a1a1a;
+  --op-surface-overlay: #2f2f2f;
+  --op-surface-sunken: #0a0a0a;
+  
+  /* Text tokens - Light text on dark backgrounds */
+  --op-text-primary: #e5e5e5;
+  --op-text-secondary: #888;
+  --op-text-tertiary: #666;
+  --op-text-disabled: #555;
+  --op-text-inverse: #ffffff;
+  
+  /* Border tokens - Dark theme borders */
+  --op-border-subtle: #222;
+  --op-border-default: #333;
+  --op-border-strong: #444;
+  --op-border-focus: #3b82f6;
+  
+  /* Interactive tokens - Original colors */
+  --op-interactive-primary: #3b82f6;
+  --op-interactive-primary-hover: #2563eb;
+  --op-interactive-primary-active: #1d4ed8;
+  --op-interactive-primary-disabled: #444;
+  
+  /* Status tokens - Original colors */
+  --op-status-success: #10b981;
+  --op-status-success-bg: rgba(16, 185, 129, 0.1);
+  --op-status-danger: #ef4444;
+  --op-status-danger-bg: rgba(239, 68, 68, 0.1);
+  
+  /* Spacing scale */
+  --op-space-3x-small: 2px;
+  --op-space-2x-small: 4px;
+  --op-space-x-small: 8px;
+  --op-space-small: 12px;
+  --op-space-medium: 16px;
+  --op-space-large: 20px;
+  --op-space-x-large: 24px;
+  --op-space-2x-large: 32px;
+  --op-space-3x-large: 40px;
+  --op-space-4x-large: 48px;
+  --op-space-5x-large: 64px;
+  
+  /* Border radius */
+  --op-radius-sm: 4px;
+  --op-radius-md: 6px;
+  --op-radius-lg: 8px;
+  --op-radius-xl: 12px;
+  --op-radius-full: 9999px;
+  
+  /* Typography */
+  --op-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --op-font-family-mono: 'Monaco', 'Courier New', monospace;
+  
+  --op-font-size-xs: 11px;
+  --op-font-size-sm: 13px;
+  --op-font-size-base: 14px;
+  --op-font-size-md: 16px;
+  --op-font-size-lg: 18px;
+  --op-font-size-xl: 24px;
+  --op-font-size-2xl: 32px;
+  
+  --op-font-weight-normal: 400;
+  --op-font-weight-medium: 500;
+  --op-font-weight-semibold: 600;
+  --op-font-weight-bold: 700;
+  
+  --op-line-height-tight: 1.2;
+  --op-line-height-normal: 1.5;
+  --op-line-height-relaxed: 1.6;
+  
+  /* Shadows */
+  --op-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --op-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --op-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --op-transition-fast: 0.15s ease;
+  --op-transition-base: 0.2s ease;
+  --op-transition-slow: 0.3s ease;
+  
+  /* Z-index scale */
+  --op-z-base: 0;
+  --op-z-dropdown: 100;
+  --op-z-sticky: 200;
+  --op-z-overlay: 300;
+  --op-z-modal: 400;
+  --op-z-popover: 500;
+  --op-z-toast: 600;
+}

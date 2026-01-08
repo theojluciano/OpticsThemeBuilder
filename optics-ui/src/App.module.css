@@ -1,24 +1,26 @@
+/* App Module - Optics Design System */
+
 :global(body) {
   margin: 0;
   padding: 0;
-  background: #0f0f0f;
-  color: #e5e5e5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--op-surface-base);
+  color: var(--op-text-primary);
+  font-family: var(--op-font-family);
 }
 
 .container {
   max-width: 1800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--op-space-large);
 }
 
 .header {
-  margin-bottom: 20px;
+  margin-bottom: var(--op-space-large);
 }
 
 .headerContent {
   display: flex;
-  gap: 20px;
+  gap: var(--op-space-large);
   align-items: center;
   justify-content: space-between;
 }
@@ -26,7 +28,7 @@
 .headerControls {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--op-space-large);
   flex: 1;
   justify-content: flex-end;
 }
@@ -35,7 +37,7 @@
   background: white;
   height: 100px;
   width: 100px;
-  border-radius: 8px;
+  border-radius: var(--op-radius-lg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -50,41 +52,41 @@
 
 .toggle {
   display: flex;
-  gap: 4px;
-  background: #0f0f0f;
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid #444;
+  gap: var(--op-space-2x-small);
+  background: var(--op-surface-base);
+  padding: var(--op-space-2x-small);
+  border-radius: var(--op-radius-lg);
+  border: 1px solid var(--op-border-default);
 }
 
 .toggle button {
   background: transparent;
-  color: #888;
-  padding: 8px 12px;
+  color: var(--op-text-tertiary);
+  padding: var(--op-space-x-small) var(--op-space-small);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--op-radius-sm);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--op-transition-base), color var(--op-transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 400;
-  font-size: 16px;
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-size-md);
 }
 
 .toggle button.active {
-  background: #3b82f6;
-  color: white;
+  background: var(--op-interactive-primary);
+  color: var(--op-text-inverse);
 }
 
 .toggle button:hover {
   background: #555;
-  color: #e5e5e5;
+  color: var(--op-text-primary);
 }
 
 .toggle button.active:hover {
-  background: #2563eb;
-  color: white;
+  background: var(--op-interactive-primary-hover);
+  color: var(--op-text-inverse);
 }
 
 .colorTypesContainer {

@@ -1,27 +1,31 @@
+/* AddCustomColorType Component - Optics Design System */
+
 .container {
-  margin-bottom: 20px;
+  margin-bottom: var(--op-space-large);
 }
 
 .addButton {
   width: 100%;
-  background: #1a1a1a;
-  border: 2px dashed #444;
-  border-radius: 8px;
-  color: #888;
-  padding: 16px;
-  font-size: 14px;
-  font-weight: 400;
+  background: var(--op-surface-raised);
+  border: 2px dashed var(--op-border-default);
+  border-radius: var(--op-radius-lg);
+  color: var(--op-text-secondary);
+  padding: var(--op-space-medium);
+  font-size: var(--op-font-size-base);
+  font-weight: var(--op-font-weight-normal);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  gap: var(--op-space-x-small);
+  transition: border-color var(--op-transition-base), 
+              color var(--op-transition-base), 
+              background var(--op-transition-base);
 }
 
 .addButton:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--op-border-focus);
+  color: var(--op-interactive-primary);
   background: rgba(59, 130, 246, 0.05);
 }
 
@@ -30,119 +34,126 @@
 }
 
 .form {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
+  background: var(--op-surface-raised);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-lg);
   overflow: hidden;
 }
 
 .formHeader {
   background: #1f1f1f;
-  border-bottom: 1px solid #333;
-  padding: 16px 20px;
+  border-bottom: 1px solid var(--op-border-default);
+  padding: var(--op-space-medium) var(--op-space-large);
 }
 
 .formTitle {
   margin: 0;
-  font-size: 16px;
-  font-weight: 400;
-  color: #e5e5e5;
+  font-size: var(--op-font-size-md);
+  font-weight: var(--op-font-weight-normal);
+  color: var(--op-text-primary);
 }
 
 .formContent {
-  padding: 20px;
+  padding: var(--op-space-large);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--op-space-large);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--op-space-x-small);
 }
 
 .label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-weight: 400;
-  color: #e5e5e5;
-  font-size: 14px;
+  gap: var(--op-space-x-small);
+  font-weight: var(--op-font-weight-normal);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-base);
 }
 
 .textInput {
-  padding: 10px 14px;
-  background: #0f0f0f;
-  border: 1px solid #444;
-  border-radius: 6px;
-  color: #e5e5e5;
-  font-size: 14px;
+  padding: var(--op-space-x-small) var(--op-space-small);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-md);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-base);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color var(--op-transition-base);
 }
 
 .textInput:focus {
-  border-color: #3b82f6;
+  border-color: var(--op-border-focus);
 }
 
 .textInput::placeholder {
-  color: #666;
+  color: var(--op-text-tertiary);
 }
 
 .colorControls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--op-space-x-small);
 }
 
 .controlsRow {
   display: flex;
-  gap: 12px;
+  gap: var(--op-space-small);
   align-items: center;
 }
 
 .formActions {
   display: flex;
-  gap: 12px;
+  gap: var(--op-space-small);
   justify-content: flex-end;
-  padding-top: 12px;
+  padding-top: var(--op-space-small);
 }
 
 .cancelButton,
 .submitButton {
-  padding: 10px 20px;
+  padding: var(--op-space-x-small) var(--op-space-large);
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 400;
+  border-radius: var(--op-radius-md);
+  font-size: var(--op-font-size-base);
+  font-weight: var(--op-font-weight-normal);
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition: background var(--op-transition-base), 
+              opacity var(--op-transition-base),
+              color var(--op-transition-base);
 }
 
 .cancelButton {
   background: transparent;
-  color: #888;
-  border: 1px solid #444;
+  color: var(--op-text-secondary);
+  border: 1px solid var(--op-border-default);
 }
 
 .cancelButton:hover {
-  background: #0f0f0f;
-  color: #e5e5e5;
+  background: var(--op-surface-base);
+  color: var(--op-text-primary);
+  border-color: var(--op-border-strong);
 }
 
 .submitButton {
-  background: #3b82f6;
-  color: white;
+  background: var(--op-interactive-primary);
+  color: var(--op-text-inverse);
 }
 
 .submitButton:hover {
-  background: #2563eb;
+  background: var(--op-interactive-primary-hover);
+}
+
+.submitButton:active {
+  background: var(--op-interactive-primary-active);
 }
 
 .submitButton:disabled {
-  background: #444;
-  color: #666;
+  background: var(--op-interactive-primary-disabled);
+  color: var(--op-text-disabled);
   cursor: not-allowed;
   opacity: 0.5;
 }

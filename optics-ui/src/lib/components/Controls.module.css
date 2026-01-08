@@ -1,53 +1,55 @@
+/* Controls Component - Optics Design System */
+
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--op-space-x-small);
   flex: 1;
 }
 
 .label {
-  font-weight: 500;
-  color: #e5e5e5;
-  font-size: 14px;
+  font-weight: var(--op-font-weight-medium);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-base);
 }
 
 .controlsRow {
   display: flex;
-  gap: 12px;
+  gap: var(--op-space-small);
   align-items: center;
 }
 
 .hslInputs {
   display: flex;
-  gap: 12px;
+  gap: var(--op-space-small);
   flex: 1;
 }
 
 .hslLabel {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: #e5e5e5;
-  font-size: 14px;
+  gap: var(--op-space-x-small);
+  font-weight: var(--op-font-weight-medium);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-base);
   flex: 1;
 }
 
 .numberInput {
   flex: 1;
-  padding: 10px 12px;
-  background: #0f0f0f;
-  border: 1px solid #444;
-  border-radius: 8px;
-  color: #e5e5e5;
-  font-size: 14px;
+  padding: var(--op-space-x-small) var(--op-space-small);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-lg);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-base);
   min-width: 0;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color var(--op-transition-base);
 }
 
 .numberInput:focus {
-  border-color: #3b82f6;
+  border-color: var(--op-border-focus);
 }
 
 .numberInput::-webkit-inner-spin-button,

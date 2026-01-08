@@ -1,46 +1,57 @@
+/* Summary Component - Optics Design System */
+
 .summary {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  background: var(--op-surface-raised);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-lg);
+  padding: var(--op-space-large);
+  margin-bottom: var(--op-space-large);
 }
 
 .title {
-  color: #e5e5e5;
-  margin-bottom: 15px;
-  font-size: 18px;
+  color: var(--op-text-primary);
+  margin-bottom: var(--op-space-medium);
+  font-size: var(--op-font-size-lg);
+  font-weight: var(--op-font-weight-medium);
 }
 
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: var(--op-space-medium);
 }
 
 .stat {
-  background: #0f0f0f;
-  padding: 15px;
-  border-radius: 6px;
+  background: var(--op-surface-base);
+  padding: var(--op-space-medium);
+  border-radius: var(--op-radius-md);
   text-align: center;
+  border: 1px solid var(--op-border-subtle);
+  transition: border-color var(--op-transition-base);
+}
+
+.stat:hover {
+  border-color: var(--op-border-default);
 }
 
 .value {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: #e5e5e5;
+  font-size: var(--op-font-size-2xl);
+  font-weight: var(--op-font-weight-bold);
+  margin-bottom: var(--op-space-2x-small);
+  color: var(--op-text-primary);
+  line-height: var(--op-line-height-tight);
 }
 
 .value.pass {
-  color: #10b981;
+  color: var(--op-status-success);
 }
 
 .value.fail {
-  color: #ef4444;
+  color: var(--op-status-danger);
 }
 
 .label {
-  color: #888;
-  font-size: 13px;
+  color: var(--op-text-secondary);
+  font-size: var(--op-font-size-sm);
+  font-weight: var(--op-font-weight-normal);
 }

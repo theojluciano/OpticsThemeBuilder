@@ -15,6 +15,7 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 - ☀️🌙 **Header Controls**: Mode toggle and export moved to header for better space utilization
 - 🎯 **Consistent Styling**: Centralized color picker styles in shared module for uniform appearance
 - ➕ **Custom Types**: Add, rename, and delete custom color types as needed
+- 🎨 **Optics Design System**: UI now uses the Optics design system with semantic design tokens, including 4 color palettes (Primary, Neutral, Success, Danger) with 19 stops each, built-in light/dark mode support using CSS `light-dark()`, and semantic tokens for spacing (`x-small`, `medium`, `large`), typography, borders, and interactions
 
 ## Table of Contents
 
@@ -72,6 +73,7 @@ node dist/cli.js generate "#3b82f6" --name "primary" --optics
 - 🎨 **Multiple Color Types**: Built-in support for Primary, Neutral, Secondary, Notice, Warning, Danger, and Info color scales, plus the ability to add custom color types
 - 🎛️ **Per-Type Color Controls**: Each color type has independent hue and saturation controls with visual color pickers
 - 🌓 **Optics Scale Format**: 19 semantic stops with light/dark mode support (`plus-max` to `minus-max`)
+- 🎨 **Optics Design System**: UI built with semantic design tokens - 4 color palettes (Primary, Neutral, Success, Danger) with 19 stops each, t-shirt sizing for spacing (`x-small`, `medium`, `large`), typography tokens, and built-in light/dark theme support via CSS `light-dark()` function
 - ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA) with visual pass/fail indicators and per-type summaries
 - 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background, plus alternative foregrounds
 - 📦 **Unified Figma Export**: Export all enabled color types to a single Figma tokens JSON file per mode (light/dark)
@@ -90,6 +92,11 @@ cd OpticsThemeBuilder/optics-ui
 npm install
 npm run dev
 ```
+
+The UI uses the Optics design system with comprehensive documentation:
+- `OPTICS_TOKEN_REFERENCE.md` - Complete token reference guide
+- `QUICK_REFERENCE.md` - Printable cheat sheet
+- `OPTICS_CSS_MIGRATION.md` - Design system implementation details
 
 ### CLI Tool
 
@@ -148,6 +155,15 @@ Each color stop card has three sliders:
 - Aim for 40%+ lightness difference between background and foreground
 - Cards with red borders have failing tests - adjust sliders until green
 - Use the contrast summary to track overall progress per color type
+
+**UI Design System:**
+The interactive UI is built using the Optics design system it generates:
+- **4 Color Palettes**: Primary (blue), Neutral (gray), Success (green), Danger (red), each with 19 semantic stops
+- **Semantic Tokens**: Surface, text, border, and interaction tokens for consistent styling
+- **Spacing Scale**: T-shirt sizing from `3x-small` (2px) to `5x-large` (64px)
+- **Typography System**: Font sizes, weights, and line heights for visual hierarchy
+- **Light/Dark Mode**: Built-in theme support using CSS `light-dark()` function
+- **Documentation**: See `optics-ui/OPTICS_TOKEN_REFERENCE.md` for complete token reference
 
 ## CLI Usage
 
@@ -577,6 +593,8 @@ The **Optics format** provides an alternative color scale system with semantic n
 - **Light/Dark modes**: Automatic theme switching with CSS `light-dark()` function
 - **Three colors per stop**: background, "on" (primary foreground), "on-alt" (alternative foreground)
 - **F-stop naming**: Photography-inspired names for intuitive luminosity control
+
+**The Interactive UI uses the Optics format**: The web interface is built with the Optics design system, featuring semantic design tokens for colors, spacing (t-shirt sizing: `x-small`, `medium`, `large`), typography, and more. See `optics-ui/OPTICS_TOKEN_REFERENCE.md` for the complete implementation.
 
 ### Quick Start with Optics Format
 

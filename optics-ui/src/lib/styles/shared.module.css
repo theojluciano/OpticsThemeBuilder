@@ -1,55 +1,57 @@
-/* Shared Color Picker Styles */
+/* Shared Component Styles - Optics Design System */
+
+/* Color Picker Styles */
 
 .colorInput {
   width: 32px;
   height: 32px;
-  padding: 0px 2px;
-  border: 1px solid #444;
-  border-radius: 6px;
+  padding: 0px var(--op-space-3x-small);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-md);
   cursor: pointer;
-  background: #0f0f0f;
-  transition: border-color 0.2s;
+  background: var(--op-surface-base);
+  transition: border-color var(--op-transition-base);
   flex-shrink: 0;
 }
 
 .colorInput:hover {
-  border-color: #666;
+  border-color: var(--op-border-strong);
 }
 
 .colorInput:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--op-border-focus);
 }
 
 .hslInputs {
   display: flex;
-  gap: 8px;
+  gap: var(--op-space-x-small);
   align-items: center;
 }
 
 .hslLabel {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 400;
-  color: #888;
-  font-size: 13px;
+  gap: var(--op-space-2x-small);
+  font-weight: var(--op-font-weight-normal);
+  color: var(--op-text-secondary);
+  font-size: var(--op-font-size-sm);
 }
 
 .numberInput {
   width: 72px;
-  padding: 6px 8px;
-  background: #0f0f0f;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #e5e5e5;
-  font-size: 13px;
+  padding: var(--op-space-x-small);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-sm);
+  color: var(--op-text-primary);
+  font-size: var(--op-font-size-sm);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color var(--op-transition-base);
 }
 
 .numberInput:focus {
-  border-color: #3b82f6;
+  border-color: var(--op-border-focus);
 }
 
 .numberInput::-webkit-inner-spin-button,
