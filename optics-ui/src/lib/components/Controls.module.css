@@ -10,7 +10,7 @@
 .label {
   font-weight: var(--op-font-weight-medium);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
 }
 
 .controlsRow {
@@ -31,7 +31,7 @@
   gap: var(--op-space-x-small);
   font-weight: var(--op-font-weight-medium);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
   flex: 1;
 }
 
@@ -40,9 +40,9 @@
   padding: var(--op-space-x-small) var(--op-space-small);
   background: var(--op-surface-base);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
   min-width: 0;
   outline: none;
   transition: border-color var(--op-transition-base);

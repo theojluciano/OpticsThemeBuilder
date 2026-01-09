@@ -37,7 +37,7 @@
   background: white;
   height: 100px;
   width: 100px;
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +55,7 @@
   gap: var(--op-space-2x-small);
   background: var(--op-surface-base);
   padding: var(--op-space-2x-small);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   border: 1px solid var(--op-border-default);
 }
 
@@ -64,14 +64,14 @@
   color: var(--op-text-tertiary);
   padding: var(--op-space-x-small) var(--op-space-small);
   border: none;
-  border-radius: var(--op-radius-sm);
+  border-radius: var(--op-radius-medium);
   cursor: pointer;
   transition: background var(--op-transition-base), color var(--op-transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: var(--op-font-weight-normal);
-  font-size: var(--op-font-size-md);
+  font-size: var(--op-font-medium);
 }
 
 .toggle button.active {

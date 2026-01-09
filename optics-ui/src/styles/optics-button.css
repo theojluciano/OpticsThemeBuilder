@@ -1,0 +1,11 @@
+.btn {
+  /* Public API (customizable component options) */
+  --_op-btn-height-small: var(--op-input-height-small);
+  --_op-btn-height-medium: var(--op-input-height-medium);
+  --_op-btn-height-large: var(--op-input-height-large);
+  --_op-btn-font-small: var(--op-font-x-small);
+  --_op-btn-font-medium: var(--op-font-small);
+  --_op-btn-font-large: var(--op-font-small);
+  --_op-btn-padding-small: 0 var(--op-space-x-small);
+  --_op-btn-padding-medium: 0 var(--op-space-small);
+  --_op-btn-padding-large: 0 

@@ -3,7 +3,7 @@
 .section {
   background: var(--op-surface-raised);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   margin-bottom: var(--op-space-medium);
   overflow: hidden;
   transition: opacity var(--op-transition-base);
@@ -57,7 +57,7 @@
 .collapseButton i {
   transition: transform var(--op-transition-base);
   display: block;
-  font-size: var(--op-font-size-md);
+  font-size: var(--op-font-medium);
 }
 
 .collapseButton i.collapsed {
@@ -66,30 +66,30 @@
 
 .title {
   margin: 0;
-  font-size: var(--op-font-size-lg);
+  font-size: var(--op-font-large);
   font-weight: var(--op-font-weight-normal);
   color: var(--op-text-primary);
   user-select: none;
 }
 
 .customBadge {
-  font-size: var(--op-font-size-xs);
+  font-size: var(--op-font-x-small);
   font-weight: var(--op-font-weight-normal);
   text-transform: uppercase;
   color: #3b82f6;
   background: rgba(59, 130, 246, 0.1);
   padding: var(--op-space-2x-small) var(--op-space-x-small);
-  border-radius: var(--op-radius-sm);
+  border-radius: var(--op-radius-medium);
   letter-spacing: 0.5px;
 }
 
 .renameInput {
   background: var(--op-surface-base);
   border: 1px solid var(--op-border-focus);
-  border-radius: var(--op-radius-sm);
+  border-radius: var(--op-radius-medium);
   color: var(--op-text-primary);
   padding: var(--op-space-x-small);
-  font-size: var(--op-font-size-lg);
+  font-size: var(--op-font-large);
   font-weight: var(--op-font-weight-normal);
   outline: none;
   min-width: 200px;
@@ -105,14 +105,14 @@
   display: flex;
   align-items: center;
   gap: var(--op-space-x-small);
-  font-size: var(--op-font-size-sm);
+  font-size: var(--op-font-small);
   color: var(--op-text-secondary);
   user-select: none;
 }
 
 .miniValue {
   font-weight: var(--op-font-weight-normal);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
 }
 
 .miniValue.pass {
@@ -169,7 +169,7 @@
   right: 0;
   bottom: 0;
   background-color: #444;
-  border-radius: var(--op-radius-full);
+  border-radius: var(--op-radius-pill);
   transition: background-color var(--op-transition-base);
 }
 
@@ -181,7 +181,7 @@
   left: 3px;
   bottom: 3px;
   background-color: var(--op-text-secondary);
-  border-radius: var(--op-radius-full);
+  border-radius: var(--op-radius-pill);
   transition: transform var(--op-transition-base), background-color var(--op-transition-base);
 }
 

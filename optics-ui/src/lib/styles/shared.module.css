@@ -7,7 +7,7 @@
   height: 32px;
   padding: 0px var(--op-space-3x-small);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-md);
+  border-radius: var(--op-radius-medium);
   cursor: pointer;
   background: var(--op-surface-base);
   transition: border-color var(--op-transition-base);
@@ -35,7 +35,7 @@
   gap: var(--op-space-2x-small);
   font-weight: var(--op-font-weight-normal);
   color: var(--op-text-secondary);
-  font-size: var(--op-font-size-sm);
+  font-size: var(--op-font-small);
 }
 
 .numberInput {
@@ -43,9 +43,9 @@
   padding: var(--op-space-x-small);
   background: var(--op-surface-base);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-sm);
+  border-radius: var(--op-radius-medium);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-sm);
+  font-size: var(--op-font-small);
   outline: none;
   transition: border-color var(--op-transition-base);
 }

@@ -8,10 +8,10 @@
   width: 100%;
   background: var(--op-surface-raised);
   border: 2px dashed var(--op-border-default);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   color: var(--op-text-secondary);
   padding: var(--op-space-medium);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
   font-weight: var(--op-font-weight-normal);
   cursor: pointer;
   display: flex;
@@ -36,7 +36,7 @@
 .form {
   background: var(--op-surface-raised);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   overflow: hidden;
 }
 
@@ -48,7 +48,7 @@
 
 .formTitle {
   margin: 0;
-  font-size: var(--op-font-size-md);
+  font-size: var(--op-font-medium);
   font-weight: var(--op-font-weight-normal);
   color: var(--op-text-primary);
 }
@@ -72,16 +72,16 @@
   gap: var(--op-space-x-small);
   font-weight: var(--op-font-weight-normal);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
 }
 
 .textInput {
   padding: var(--op-space-x-small) var(--op-space-small);
   background: var(--op-surface-base);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-md);
+  border-radius: var(--op-radius-large);
   color: var(--op-text-primary);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
   outline: none;
   transition: border-color var(--op-transition-base);
 }
@@ -117,8 +117,8 @@
 .submitButton {
   padding: var(--op-space-x-small) var(--op-space-large);
   border: none;
-  border-radius: var(--op-radius-md);
-  font-size: var(--op-font-size-base);
+  border-radius: var(--op-radius-large);
+  font-size: var(--op-font-small);
   font-weight: var(--op-font-weight-normal);
   cursor: pointer;
   transition: background var(--op-transition-base), 

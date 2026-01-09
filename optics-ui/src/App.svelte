@@ -1,6 +1,7 @@
 <script lang="ts">
   import ColorTypeSection from './lib/components/ColorTypeSection.svelte';
   import AddCustomColorType from './lib/components/AddCustomColorType.svelte';
+  import ComponentPreview from './lib/components/ComponentPreview.svelte';
   import Export from './lib/components/Export.svelte';
   import { colorTypes } from './lib/stores/color-types';
   import styles from './App.module.css';
@@ -40,6 +41,8 @@
   </header>
 
   <div class={styles.colorTypesContainer}>
+    <ComponentPreview />
+    
     {#each $colorTypes.colorTypes as colorType (colorType.id)}
       <ColorTypeSection {colorType} />
     {/each}

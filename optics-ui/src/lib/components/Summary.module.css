@@ -3,7 +3,7 @@
 .summary {
   background: var(--op-surface-raised);
   border: 1px solid var(--op-border-default);
-  border-radius: var(--op-radius-lg);
+  border-radius: var(--op-radius-large);
   padding: var(--op-space-large);
   margin-bottom: var(--op-space-large);
 }
@@ -11,7 +11,7 @@
 .title {
   color: var(--op-text-primary);
   margin-bottom: var(--op-space-medium);
-  font-size: var(--op-font-size-lg);
+  font-size: var(--op-font-large);
   font-weight: var(--op-font-weight-medium);
 }
 
@@ -24,7 +24,7 @@
 .stat {
   background: var(--op-surface-base);
   padding: var(--op-space-medium);
-  border-radius: var(--op-radius-md);
+  border-radius: var(--op-radius-large);
   text-align: center;
   border: 1px solid var(--op-border-subtle);
   transition: border-color var(--op-transition-base);
@@ -35,7 +35,7 @@
 }
 
 .value {
-  font-size: var(--op-font-size-2xl);
+  font-size: var(--op-font-4x-large);
   font-weight: var(--op-font-weight-bold);
   margin-bottom: var(--op-space-2x-small);
   color: var(--op-text-primary);
@@ -52,6 +52,6 @@
 
 .label {
   color: var(--op-text-secondary);
-  font-size: var(--op-font-size-sm);
+  font-size: var(--op-font-small);
   font-weight: var(--op-font-weight-normal);
 }

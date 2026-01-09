@@ -7,10 +7,10 @@
   padding: var(--op-space-small) var(--op-space-large);
   background: var(--op-interactive-primary);
   border: none;
-  border-radius: var(--op-radius-md);
+  border-radius: var(--op-radius-large);
   color: var(--op-text-inverse);
   font-weight: var(--op-font-weight-normal);
-  font-size: var(--op-font-size-base);
+  font-size: var(--op-font-small);
   cursor: pointer;
   transition: background var(--op-transition-base);
   white-space: nowrap;
