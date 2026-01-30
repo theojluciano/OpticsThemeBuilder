@@ -1,3 +1,5 @@
+<img width="1071" height="809" alt="image" src="https://github.com/user-attachments/assets/8c9c6036-22cc-408a-b102-ac6e60f549bc" />
+
 # OpticsThemeBuilder 🎨
 
 Generate accessible color palettes for Figma with automatic foreground color selection and WCAG contrast checking.
