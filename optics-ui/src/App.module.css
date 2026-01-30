@@ -101,7 +101,7 @@
 .resetButton {
   background: transparent;
   border: 1px solid var(--op-border-default);
-  color: var(--op-text-secondary);
+  color: var(--op-text-primary);
   padding: 0;
   border-radius: var(--op-radius-large);
   cursor: pointer;
