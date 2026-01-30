@@ -54,15 +54,17 @@
   display: flex;
   gap: var(--op-space-2x-small);
   background: var(--op-surface-base);
-  padding: var(--op-space-2x-small);
   border-radius: var(--op-radius-large);
   border: 1px solid var(--op-border-default);
+  height: 4.4rem;
+  padding: var(--op-space-2x-small);
+  box-sizing: border-box;
 }
 
 .toggle button {
   background: transparent;
   color: var(--op-text-tertiary);
-  padding: var(--op-space-x-small) var(--op-space-small);
+  padding: 0 var(--op-space-small);
   border: none;
   border-radius: var(--op-radius-medium);
   cursor: pointer;
@@ -72,6 +74,8 @@
   justify-content: center;
   font-weight: var(--op-font-weight-normal);
   font-size: var(--op-font-medium);
+  flex: 1;
+  min-width: 4rem;
 }
 
 .toggle button.active {
@@ -92,4 +96,28 @@
 .colorTypesContainer {
   display: flex;
   flex-direction: column;
+}
+
+.resetButton {
+  background: transparent;
+  border: 1px solid var(--op-border-default);
+  color: var(--op-text-secondary);
+  padding: 0;
+  border-radius: var(--op-radius-large);
+  cursor: pointer;
+  transition: all var(--op-transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-medium);
+  height: 4.4rem;
+  width: 4.4rem;
+  flex-shrink: 0;
+}
+
+.resetButton:hover {
+  background: var(--op-status-danger);
+  border-color: var(--op-status-danger);
+  color: var(--op-text-inverse);
 }

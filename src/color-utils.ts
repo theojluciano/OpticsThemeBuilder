@@ -28,6 +28,7 @@ export function toRGBColor(color: Rgb): RGBColor {
 
 /**
  * Parse a color string or HSL object into a culori Hsl object
+ * Handles both normalized (0-1) and percentage (0-100) values for HSL objects
  */
 export function parseColor(input: string | HSLColor): Hsl {
   if (typeof input === 'string') {
@@ -37,10 +38,14 @@ export function parseColor(input: string | HSLColor): Hsl {
     }
     return parsed;
   } else {
+    // Normalize HSL values: if s or l > 1, assume they're percentages
+    const s = input.s > 1 ? input.s / 100 : input.s;
+    const l = input.l > 1 ? input.l / 100 : input.l;
+    
     const parsed = hsl({
       h: input.h,
-      s: input.s,
-      l: input.l,
+      s,
+      l,
     });
     if (!parsed) {
       throw new Error(`Invalid HSL input: ${JSON.stringify(input)}`);
@@ -72,4 +77,24 @@ export function createHsl(h: number, s: number, l: number): Hsl {
     s: s / 100,
     l: l / 100,
   })!;
+}
+
+/**
+ * Create a complete color value object with HSL, RGB, and hex formats
+ * This is a unified builder to reduce duplication across the codebase
+ */
+export function createColorValue(h: number, s: number, l: number): {
+  hsl: HSLColor;
+  rgb: RGBColor;
+  hex: string;
+} {
+  const { formatHex } = require('culori');
+  const hslColor = createHsl(h, s, l);
+  const rgbColor = hslToRgb(hslColor);
+  
+  return {
+    hsl: toHSLColor(hslColor),
+    rgb: toRGBColor(rgbColor),
+    hex: formatHex(rgbColor),
+  };
 }

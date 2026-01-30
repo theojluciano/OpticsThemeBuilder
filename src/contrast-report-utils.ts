@@ -108,3 +108,43 @@ export function getWCAGLevel(ratio: number): string {
   if (ratio >= 3) return 'AA Large ✓';
   return 'Does not meet WCAG standards';
 }
+
+/**
+ * Create a contrast failure object
+ */
+export function createContrastFailure(
+  mode: string | undefined,
+  stop: string | number,
+  background: { hex: string; hsl: { h: number; s: number; l: number } },
+  foreground: { hex: string; hsl: { h: number; s: number; l: number } },
+  foregroundType: string,
+  ratio: number
+): ContrastFailure {
+  return {
+    mode,
+    stop,
+    background: background.hex,
+    backgroundLightness: Math.round(background.hsl.l * 100),
+    foreground: foreground.hex,
+    foregroundLightness: Math.round(foreground.hsl.l * 100),
+    foregroundType,
+    ratio,
+  };
+}
+
+/**
+ * Collect failures from a contrast check
+ */
+export function collectFailureIfNeeded(
+  ratio: number,
+  mode: string | undefined,
+  stop: string | number,
+  background: { hex: string; hsl: { h: number; s: number; l: number } },
+  foreground: { hex: string; hsl: { h: number; s: number; l: number } },
+  foregroundType: string
+): ContrastFailure | null {
+  if (!passesWCAG_AA(ratio)) {
+    return createContrastFailure(mode, stop, background, foreground, foregroundType, ratio);
+  }
+  return null;
+}

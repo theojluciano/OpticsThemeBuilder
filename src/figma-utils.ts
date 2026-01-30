@@ -3,14 +3,19 @@
  */
 
 /**
- * Convert hex color to Figma color value format
+ * Figma color value structure
  */
-export function hexToFigmaColor(hex: string): {
+interface FigmaColorValue {
   colorSpace: string;
   components: number[];
   alpha: number;
   hex: string;
-} {
+}
+
+/**
+ * Convert hex color to Figma color value format
+ */
+export function hexToFigmaColor(hex: string): FigmaColorValue {
   // Remove # if present
   const cleanHex = hex.replace('#', '');
   
@@ -20,28 +25,26 @@ export function hexToFigmaColor(hex: string): {
   const b = parseInt(cleanHex.substring(4, 6), 16);
   
   // Convert to 0-1 range
-  return {
-    colorSpace: 'srgb',
-    components: [r / 255, g / 255, b / 255],
-    alpha: 1.0,
-    hex: hex.toUpperCase(),
-  };
+  return createFigmaColorValue([r / 255, g / 255, b / 255], hex.toUpperCase());
 }
 
 /**
  * Convert RGB components to Figma color value format
  */
-export function rgbToFigmaColor(rgb: { r: number; g: number; b: number }, hex: string): {
-  colorSpace: string;
-  components: number[];
-  alpha: number;
-  hex: string;
-} {
+export function rgbToFigmaColor(rgb: { r: number; g: number; b: number }, hex: string): FigmaColorValue {
+  return createFigmaColorValue([rgb.r, rgb.g, rgb.b], hex);
+}
+
+/**
+ * Create a Figma color value object
+ * Unified builder to reduce duplication
+ */
+function createFigmaColorValue(components: number[], hex: string): FigmaColorValue {
   return {
     colorSpace: 'srgb',
-    components: [rgb.r, rgb.g, rgb.b],
+    components,
     alpha: 1.0,
-    hex: hex,
+    hex,
   };
 }
 
@@ -52,33 +55,33 @@ export function createFigmaExtensions(
   variableId: string,
   scopes: string[] = ['ALL_SCOPES'],
   webValue?: string
-): any {
-  const extensions: any = {
+): Record<string, any> {
+  const extensions: Record<string, any> = {
     'com.figma.variableId': variableId,
     'com.figma.scopes': scopes,
   };
   
   if (webValue) {
-    extensions['com.figma.codeSyntax'] = {
-      WEB: webValue,
-    };
+    extensions['com.figma.codeSyntax'] = { WEB: webValue };
   }
   
   return extensions;
 }
 
 /**
- * Create a Figma color token
+ * Create a Figma color token with all required fields
  */
 export function createColorToken(
   hex: string,
-  variableId: string,
+  variableId?: string,
   webValue?: string
-): any {
+): Record<string, any> {
+  const id = variableId || generateVariableId();
+  
   return {
     $type: 'color',
     $value: hexToFigmaColor(hex),
-    $extensions: createFigmaExtensions(variableId, ['ALL_SCOPES'], webValue),
+    $extensions: createFigmaExtensions(id, ['ALL_SCOPES'], webValue),
   };
 }
 
@@ -92,7 +95,7 @@ export function generateVariableId(): string {
 /**
  * Create root-level extensions for a Figma export
  */
-export function createRootExtensions(modeName: string): any {
+export function createRootExtensions(modeName: string): Record<string, any> {
   return {
     $extensions: {
       'com.figma.modeName': modeName,

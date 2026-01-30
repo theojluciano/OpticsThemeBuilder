@@ -5,6 +5,7 @@ import { generatePalette } from './generator';
 import { generateOpticsPalette } from './optics-generator';
 import { exportAll } from './exporter';
 import { exportOpticsAll, exportOpticsToFigma } from './optics-exporter';
+import { exportOpticsContrastReport } from './optics-exporter';
 import * as path from 'path';
 import { saveToFile } from './file-utils';
 import {
@@ -85,6 +86,54 @@ program
   });
 
 /**
+ * Display contrast information for key stops
+ */
+function displayOpticsContrast(palette: any): void {
+  printSampleContrastHeader();
+  const sampleStops = ['plus-max', 'base', 'minus-max'];
+  palette.stops
+    .filter((s: any) => sampleStops.includes(s.name))
+    .forEach((stop: any) => {
+      printOpticsContrastSample(
+        stop.name,
+        'light',
+        stop.background.light.hex,
+        stop.lightModeContrast.on,
+        stop.lightModeContrast.onAlt
+      );
+      printOpticsContrastSample(
+        '',
+        'dark',
+        stop.background.dark.hex,
+        stop.darkModeContrast.on,
+        stop.darkModeContrast.onAlt
+      );
+    });
+}
+
+/**
+ * Display contrast information for standard palette
+ */
+function displayStandardContrast(palette: any): void {
+  printContrastAnalysisHeader();
+  palette.stops.forEach((stop: any) => {
+    const recommended = stop.recommendedForeground === 'light' ? 'Light' : 'Dark';
+    const lightPass = stop.foregrounds.light.wcagAA ? '✓' : '✗';
+    const darkPass = stop.foregrounds.dark.wcagAA ? '✓' : '✗';
+    
+    printContrastLine(
+      stop.stop,
+      stop.background.hex,
+      recommended,
+      lightPass,
+      stop.foregrounds.light.contrast,
+      darkPass,
+      stop.foregrounds.dark.contrast
+    );
+  });
+}
+
+/**
  * Handle Optics palette generation
  */
 function handleOpticsGeneration(color: string, options: any): void {
@@ -101,27 +150,8 @@ function handleOpticsGeneration(color: string, options: any): void {
     opticsPalette.baseColor.l
   );
   
-  // Display contrast information for key stops
-  printSampleContrastHeader();
-  const sampleStops = ['plus-max', 'base', 'minus-max'];
-  opticsPalette.stops
-    .filter(s => sampleStops.includes(s.name))
-    .forEach((stop) => {
-      printOpticsContrastSample(
-        stop.name,
-        'light',
-        stop.background.light.hex,
-        stop.lightModeContrast.on,
-        stop.lightModeContrast.onAlt
-      );
-      printOpticsContrastSample(
-        '',
-        'dark',
-        stop.background.dark.hex,
-        stop.darkModeContrast.on,
-        stop.darkModeContrast.onAlt
-      );
-    });
+  // Display contrast information
+  displayOpticsContrast(opticsPalette);
   
   printExportHeader();
   
@@ -153,22 +183,7 @@ function handleStandardGeneration(color: string, options: any): void {
   printBaseColorInfo(palette.stops.length, palette.baseColor.hex);
   
   // Display contrast information
-  printContrastAnalysisHeader();
-  palette.stops.forEach((stop) => {
-    const recommended = stop.recommendedForeground === 'light' ? 'Light' : 'Dark';
-    const lightPass = stop.foregrounds.light.wcagAA ? '✓' : '✗';
-    const darkPass = stop.foregrounds.dark.wcagAA ? '✓' : '✗';
-    
-    printContrastLine(
-      stop.stop,
-      stop.background.hex,
-      recommended,
-      lightPass,
-      stop.foregrounds.light.contrast,
-      darkPass,
-      stop.foregrounds.dark.contrast
-    );
-  });
+  displayStandardContrast(palette);
   
   printExportHeader();
   
@@ -193,12 +208,15 @@ function exportOpticsFiles(palette: any, outputDir: string, mode: string): void 
     printFileExport('Figma Variables (Dark)', path.basename(files.figmaDark));
     printFileExport('Contrast Report', path.basename(files.contrastReport));
   } else if (mode === 'light' || mode === 'dark') {
-    const modeCapitalized = mode.charAt(0).toUpperCase() + mode.slice(1);
+    const modeCapitalized = mode.charAt(0).toUpperCase() + mode.slice(1) as 'Light' | 'Dark';
     const filepath = path.join(outputDir, `${palette.name}-${mode}.tokens.json`);
     const contrastReportPath = path.join(outputDir, `${palette.name}-contrast-report.txt`);
     
-    const content = exportOpticsToFigma(palette, modeCapitalized as 'Light' | 'Dark');
-    saveToFile(content, filepath);
+    const figmaContent = exportOpticsToFigma(palette, modeCapitalized);
+    const contrastContent = exportOpticsContrastReport(palette);
+    
+    saveToFile(figmaContent, filepath);
+    saveToFile(contrastContent, contrastReportPath);
     
     printFileExport(`Figma Variables (${modeCapitalized})`, path.basename(filepath));
     printFileExport('Contrast Report', path.basename(contrastReportPath));

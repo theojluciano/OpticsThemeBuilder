@@ -1,7 +1,7 @@
 import { formatHex, Hsl, Rgb } from 'culori';
 import { getContrastRatio, meetsWCAG_AA, meetsWCAG_AAA } from './contrast';
 import { ColorStop, ColorPalette, HSLColor } from './types';
-import { parseColor, toHSLColor, toRGBColor, hslToRgb } from './color-utils';
+import { parseColor, toHSLColor, toRGBColor, hslToRgb, createColorValue } from './color-utils';
 
 /**
  * Generate a perceptually distributed lightness scale
@@ -39,37 +39,40 @@ function easeInOutQuad(t: number): number {
  * Returns both a light and dark option
  */
 function generateForegroundColors(background: Hsl): {
-  light: { color: Hsl; contrast: number };
-  dark: { color: Hsl; contrast: number };
+  light: { 
+    hsl: HSLColor;
+    rgb: { r: number; g: number; b: number };
+    hex: string;
+    contrast: number;
+  };
+  dark: {
+    hsl: HSLColor;
+    rgb: { r: number; g: number; b: number };
+    hex: string;
+    contrast: number;
+  };
 } {
   const bgRgb = hslToRgb(background);
+  const h = background.h || 0;
+  const s = (background.s || 0) * 100;
   
-  // Light foreground (near white)
-  const lightForeground: Hsl = {
-    mode: 'hsl',
-    h: background.h,
-    s: (background.s || 0) * 0.1, // Reduce saturation significantly
-    l: 0.98,
-  };
+  // Light foreground (near white) - reduced saturation
+  const lightFg = createColorValue(h, s * 0.1, 98);
   
-  // Dark foreground (near black)
-  const darkForeground: Hsl = {
-    mode: 'hsl',
-    h: background.h,
-    s: (background.s || 0) * 0.15, // Slight saturation for warmth
-    l: 0.08,
-  };
+  // Dark foreground (near black) - slight saturation for warmth
+  const darkFg = createColorValue(h, s * 0.15, 8);
   
-  const lightRgb = hslToRgb(lightForeground);
-  const darkRgb = hslToRgb(darkForeground);
+  // Convert our RGB format to culori Rgb format for contrast calculation
+  const lightRgb: Rgb = { mode: 'rgb', r: lightFg.rgb.r, g: lightFg.rgb.g, b: lightFg.rgb.b };
+  const darkRgb: Rgb = { mode: 'rgb', r: darkFg.rgb.r, g: darkFg.rgb.g, b: darkFg.rgb.b };
   
   return {
     light: {
-      color: lightForeground,
+      ...lightFg,
       contrast: getContrastRatio(bgRgb, lightRgb),
     },
     dark: {
-      color: darkForeground,
+      ...darkFg,
       contrast: getContrastRatio(bgRgb, darkRgb),
     },
   };
@@ -112,44 +115,38 @@ export function generatePalette(
   const stops: ColorStop[] = lightnessStops.map((lightness, index) => {
     // Create background color with adjusted saturation
     const adjustedSaturation = adjustSaturation(baseHsl.s || 0, lightness);
+    const h = baseHsl.h || 0;
+    const s = adjustedSaturation * 100;
+    const l = lightness * 100;
     
-    const bgColor: Hsl = {
+    // Use unified color builder for background
+    const bgColor = createColorValue(h, s, l);
+    
+    // Create HSL object for foreground generation
+    const bgHsl: Hsl = {
       mode: 'hsl',
-      h: baseHsl.h,
+      h,
       s: adjustedSaturation,
       l: lightness,
     };
     
-    const bgRgb = hslToRgb(bgColor);
-    const bgHex = formatHex(bgRgb);
-    
     // Generate foreground colors
-    const foregrounds = generateForegroundColors(bgColor);
+    const foregrounds = generateForegroundColors(bgHsl);
     
     // Determine recommended foreground
     const recommended = foregrounds.light.contrast > foregrounds.dark.contrast ? 'light' : 'dark';
     
     return {
       stop: index,
-      background: {
-        hsl: toHSLColor(bgColor),
-        rgb: toRGBColor(bgRgb),
-        hex: bgHex,
-      },
+      background: bgColor,
       foregrounds: {
         light: {
-          hsl: toHSLColor(foregrounds.light.color),
-          rgb: toRGBColor(hslToRgb(foregrounds.light.color)),
-          hex: formatHex(foregrounds.light.color),
-          contrast: foregrounds.light.contrast,
+          ...foregrounds.light,
           wcagAA: meetsWCAG_AA(foregrounds.light.contrast),
           wcagAAA: meetsWCAG_AAA(foregrounds.light.contrast),
         },
         dark: {
-          hsl: toHSLColor(foregrounds.dark.color),
-          rgb: toRGBColor(hslToRgb(foregrounds.dark.color)),
-          hex: formatHex(foregrounds.dark.color),
-          contrast: foregrounds.dark.contrast,
+          ...foregrounds.dark,
           wcagAA: meetsWCAG_AA(foregrounds.dark.contrast),
           wcagAAA: meetsWCAG_AAA(foregrounds.dark.contrast),
         },

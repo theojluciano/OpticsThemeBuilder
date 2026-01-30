@@ -41,13 +41,20 @@ export function exportFigmaJSON(palettes: PaletteData[]): string {
 
     OPTICS_STOPS.forEach(stop => {
       const values = data.stops[stop];
-      const bgHex = culori.formatHex(culori.hsl({ h: data.h, s: data.s / 100, l: values.bg / 100 }));
-      const onHex = culori.formatHex(culori.hsl({ h: data.h, s: data.s / 100, l: values.on / 100 }));
-      const onAltHex = culori.formatHex(culori.hsl({ h: data.h, s: data.s / 100, l: values.onAlt / 100 }));
       
-      const bgRgb = culori.rgb(bgHex)!;
-      const onRgb = culori.rgb(onHex)!;
-      const onAltRgb = culori.rgb(onAltHex)!;
+      // Convert HSL directly to RGB to avoid rounding errors from hex conversion
+      const bgHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.bg / 100 });
+      const onHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.on / 100 });
+      const onAltHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.onAlt / 100 });
+      
+      const bgRgb = culori.rgb(bgHsl)!;
+      const onRgb = culori.rgb(onHsl)!;
+      const onAltRgb = culori.rgb(onAltHsl)!;
+      
+      // Generate hex values from RGB for display purposes
+      const bgHex = culori.formatHex(bgRgb);
+      const onHex = culori.formatHex(onRgb);
+      const onAltHex = culori.formatHex(onAltRgb);
       
       const bgVar = {
         $type: 'color',

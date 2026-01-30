@@ -7,7 +7,7 @@ import {
   generateFailuresSummary,
   generateContrastEntry,
   generateStandardsFooter,
-  passesWCAG_AA,
+  collectFailureIfNeeded,
   ContrastFailure,
   ContrastEntry,
 } from './contrast-report-utils';
@@ -120,25 +120,54 @@ export function exportOpticsContrastReport(palette: OpticsPalette): string {
     palette.stops.length
   );
   
-  // Collect all failures
-  const failures: ContrastFailure[] = [];
-  
-  palette.stops.forEach(stop => {
+  // Collect all failures using shared utility
+  const failures: ContrastFailure[] = palette.stops.flatMap(stop => {
+    const stopIdentifier = `${palette.name}/${stop.name}`;
+    const results: ContrastFailure[] = [];
+    
     // Light mode failures
-    if (!passesWCAG_AA(stop.lightModeContrast.on)) {
-      failures.push(createFailure('Light', palette.name, stop.name, stop.background.light, stop.on.light, 'on', stop.lightModeContrast.on));
-    }
-    if (!passesWCAG_AA(stop.lightModeContrast.onAlt)) {
-      failures.push(createFailure('Light', palette.name, stop.name, stop.background.light, stop.onAlt.light, 'on-alt', stop.lightModeContrast.onAlt));
-    }
+    const lightOnFailure = collectFailureIfNeeded(
+      stop.lightModeContrast.on,
+      'Light',
+      stopIdentifier,
+      stop.background.light,
+      stop.on.light,
+      'on'
+    );
+    if (lightOnFailure) results.push(lightOnFailure);
+    
+    const lightOnAltFailure = collectFailureIfNeeded(
+      stop.lightModeContrast.onAlt,
+      'Light',
+      stopIdentifier,
+      stop.background.light,
+      stop.onAlt.light,
+      'on-alt'
+    );
+    if (lightOnAltFailure) results.push(lightOnAltFailure);
     
     // Dark mode failures
-    if (!passesWCAG_AA(stop.darkModeContrast.on)) {
-      failures.push(createFailure('Dark', palette.name, stop.name, stop.background.dark, stop.on.dark, 'on', stop.darkModeContrast.on));
-    }
-    if (!passesWCAG_AA(stop.darkModeContrast.onAlt)) {
-      failures.push(createFailure('Dark', palette.name, stop.name, stop.background.dark, stop.onAlt.dark, 'on-alt', stop.darkModeContrast.onAlt));
-    }
+    const darkOnFailure = collectFailureIfNeeded(
+      stop.darkModeContrast.on,
+      'Dark',
+      stopIdentifier,
+      stop.background.dark,
+      stop.on.dark,
+      'on'
+    );
+    if (darkOnFailure) results.push(darkOnFailure);
+    
+    const darkOnAltFailure = collectFailureIfNeeded(
+      stop.darkModeContrast.onAlt,
+      'Dark',
+      stopIdentifier,
+      stop.background.dark,
+      stop.onAlt.dark,
+      'on-alt'
+    );
+    if (darkOnAltFailure) results.push(darkOnAltFailure);
+    
+    return results;
   });
   
   // Generate failures summary
@@ -153,30 +182,6 @@ export function exportOpticsContrastReport(palette: OpticsPalette): string {
   report += generateStandardsFooter();
   
   return report;
-}
-
-/**
- * Create a contrast failure object
- */
-function createFailure(
-  mode: string,
-  paletteName: string,
-  stopName: string,
-  background: { hex: string; hsl: { l: number } },
-  foreground: { hex: string; hsl: { l: number } },
-  fgType: string,
-  ratio: number
-): ContrastFailure {
-  return {
-    mode,
-    stop: `${paletteName}/${stopName}`,
-    background: background.hex,
-    backgroundLightness: Math.round(background.hsl.l),
-    foreground: foreground.hex,
-    foregroundLightness: Math.round(foreground.hsl.l),
-    foregroundType: fgType,
-    ratio,
-  };
 }
 
 /**
@@ -195,30 +200,28 @@ function generateModeReport(
     const onAlt = mode === 'light' ? stop.onAlt.light : stop.onAlt.dark;
     const contrast = mode === 'light' ? stop.lightModeContrast : stop.darkModeContrast;
     
-    const bgL = Math.round(bg.hsl.l);
-    const onL = Math.round(on.hsl.l);
-    const onAltL = Math.round(onAlt.hsl.l);
+    const bgL = Math.round(bg.hsl.l * 100);
+    const onL = Math.round(on.hsl.l * 100);
+    const onAltL = Math.round(onAlt.hsl.l * 100);
     
     report += `### ${palette.name}/${stop.name} (L:${bgL}%)\n`;
     report += `Background: ${bg.hex}\n\n`;
     
     // On color
-    const onEntry: ContrastEntry = {
+    report += generateContrastEntry({
       label: `${palette.name}/${stop.name}-on (L:${onL}%)`,
       hex: on.hex,
       lightness: onL,
       ratio: contrast.on,
-    };
-    report += generateContrastEntry(onEntry);
+    });
     
     // On-alt color
-    const onAltEntry: ContrastEntry = {
+    report += generateContrastEntry({
       label: `${palette.name}/${stop.name}-on-alt (L:${onAltL}%)`,
       hex: onAlt.hex,
       lightness: onAltL,
       ratio: contrast.onAlt,
-    };
-    report += generateContrastEntry(onAltEntry);
+    });
   });
   
   return report;

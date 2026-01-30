@@ -7,7 +7,7 @@ import {
   generateFailuresSummary,
   generateContrastEntry,
   generateStandardsFooter,
-  passesWCAG_AA,
+  collectFailureIfNeeded,
   ContrastFailure,
   ContrastEntry,
 } from './contrast-report-utils';
@@ -92,33 +92,31 @@ export function exportContrastReport(palette: ColorPalette): string {
     palette.stops.length
   );
   
-  // Collect failures
-  const failures: ContrastFailure[] = [];
-  
-  palette.stops.forEach(stop => {
-    if (!passesWCAG_AA(stop.foregrounds.light.contrast)) {
-      failures.push({
-        stop: stop.stop,
-        background: stop.background.hex,
-        backgroundLightness: Math.round(stop.background.hsl.l),
-        foreground: stop.foregrounds.light.hex,
-        foregroundLightness: Math.round(stop.foregrounds.light.hsl.l),
-        foregroundType: 'light',
-        ratio: stop.foregrounds.light.contrast,
-      });
-    }
+  // Collect failures using shared utility
+  const failures: ContrastFailure[] = palette.stops.flatMap(stop => {
+    const results: ContrastFailure[] = [];
     
-    if (!passesWCAG_AA(stop.foregrounds.dark.contrast)) {
-      failures.push({
-        stop: stop.stop,
-        background: stop.background.hex,
-        backgroundLightness: Math.round(stop.background.hsl.l),
-        foreground: stop.foregrounds.dark.hex,
-        foregroundLightness: Math.round(stop.foregrounds.dark.hsl.l),
-        foregroundType: 'dark',
-        ratio: stop.foregrounds.dark.contrast,
-      });
-    }
+    const lightFailure = collectFailureIfNeeded(
+      stop.foregrounds.light.contrast,
+      undefined,
+      stop.stop,
+      stop.background,
+      stop.foregrounds.light,
+      'light'
+    );
+    if (lightFailure) results.push(lightFailure);
+    
+    const darkFailure = collectFailureIfNeeded(
+      stop.foregrounds.dark.contrast,
+      undefined,
+      stop.stop,
+      stop.background,
+      stop.foregrounds.dark,
+      'dark'
+    );
+    if (darkFailure) results.push(darkFailure);
+    
+    return results;
   });
   
   // Generate failures summary
@@ -133,22 +131,21 @@ export function exportContrastReport(palette: ColorPalette): string {
     report += `Recommended: Use ${stop.recommendedForeground} foreground\n\n`;
     
     // Light foreground
-    const lightEntry: ContrastEntry = {
+    // Light foreground
+    report += generateContrastEntry({
       label: `Light Foreground (${stop.foregrounds.light.hex})`,
       hex: stop.foregrounds.light.hex,
-      lightness: Math.round(stop.foregrounds.light.hsl.l),
+      lightness: Math.round(stop.foregrounds.light.hsl.l * 100),
       ratio: stop.foregrounds.light.contrast,
-    };
-    report += generateContrastEntry(lightEntry);
+    });
     
     // Dark foreground
-    const darkEntry: ContrastEntry = {
+    report += generateContrastEntry({
       label: `Dark Foreground (${stop.foregrounds.dark.hex})`,
       hex: stop.foregrounds.dark.hex,
-      lightness: Math.round(stop.foregrounds.dark.hsl.l),
+      lightness: Math.round(stop.foregrounds.dark.hsl.l * 100),
       ratio: stop.foregrounds.dark.contrast,
-    };
-    report += generateContrastEntry(darkEntry);
+    });
   });
   
   // Add footer

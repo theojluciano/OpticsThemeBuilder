@@ -19,6 +19,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "@rolemodel/optics": "^2.3.0",
     "culori": "^4.0.2",
     "phosphor-icons": "^1.4.2",
     "zustand": "^5.0.9"

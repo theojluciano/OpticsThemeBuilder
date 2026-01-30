@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   gap: var(--op-space-x-small);
-  padding: var(--op-space-small) var(--op-space-large);
+  padding: 0 var(--op-space-large);
   background: var(--op-interactive-primary);
   border: none;
   border-radius: var(--op-radius-large);
@@ -13,7 +13,7 @@
   font-size: var(--op-font-small);
   cursor: pointer;
   transition: background var(--op-transition-base);
-  white-space: nowrap;
+  height: 4.4rem;
 }
 
 .exportButton:hover {

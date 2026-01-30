@@ -295,13 +295,27 @@ html {
   --op-input-height-large: 4rem; /* 40px */
   --op-input-height-x-large: 8.4rem; /* 84px */
   
-  /* Input focus shadows for buttons */
-  --op-input-focus-primary: 0 0 0 3px light-dark(hsl(var(--op-color-primary-h) var(--op-color-primary-s) 90% / 0.5), hsl(var(--op-color-primary-h) var(--op-color-primary-s) 24% / 0.5));
-  --op-input-focus-secondary: 0 0 0 3px light-dark(hsl(var(--op-color-secondary-h) var(--op-color-secondary-s) 90% / 0.5), hsl(var(--op-color-secondary-h) var(--op-color-secondary-s) 24% / 0.5));
-  --op-input-focus-danger: 0 0 0 3px light-dark(hsl(var(--op-color-alerts-danger-h) var(--op-color-alerts-danger-s) 90% / 0.5), hsl(var(--op-color-alerts-danger-h) var(--op-color-alerts-danger-s) 24% / 0.5));
-  --op-input-focus-warning: 0 0 0 3px light-dark(hsl(var(--op-color-alerts-warning-h) var(--op-color-alerts-warning-s) 90% / 0.5), hsl(var(--op-color-alerts-warning-h) var(--op-color-alerts-warning-s) 24% / 0.5));
-  --op-input-focus-notice: 0 0 0 3px light-dark(hsl(var(--op-color-alerts-notice-h) var(--op-color-alerts-notice-s) 90% / 0.5), hsl(var(--op-color-alerts-notice-h) var(--op-color-alerts-notice-s) 24% / 0.5));
-  --op-input-focus-info: 0 0 0 3px light-dark(hsl(var(--op-color-alerts-info-h) var(--op-color-alerts-info-s) 90% / 0.5), hsl(var(--op-color-alerts-info-h) var(--op-color-alerts-info-s) 24% / 0.5));
+  /* Input focus shadows - Official Optics compound shadows (inner + outer) */
+  --op-input-inner-focus: inset 0 0 0 var(--op-border-width-large);
+  --op-input-outer-focus: 0 0 0 var(--op-border-width-x-large);
+  --op-input-focus-primary:
+    var(--op-input-inner-focus) var(--op-color-primary-plus-two),
+    var(--op-input-outer-focus) var(--op-color-primary-plus-five);
+  --op-input-focus-secondary:
+    var(--op-input-inner-focus) var(--op-color-secondary-plus-two),
+    var(--op-input-outer-focus) var(--op-color-secondary-plus-five);
+  --op-input-focus-danger:
+    var(--op-input-inner-focus) var(--op-color-alerts-danger-plus-two),
+    var(--op-input-outer-focus) var(--op-color-alerts-danger-plus-five);
+  --op-input-focus-warning:
+    var(--op-input-inner-focus) var(--op-color-alerts-warning-plus-two),
+    var(--op-input-outer-focus) var(--op-color-alerts-warning-plus-five);
+  --op-input-focus-info:
+    var(--op-input-inner-focus) var(--op-color-alerts-info-plus-two),
+    var(--op-input-outer-focus) var(--op-color-alerts-info-plus-five);
+  --op-input-focus-notice:
+    var(--op-input-inner-focus) var(--op-color-alerts-notice-plus-two),
+    var(--op-input-outer-focus) var(--op-color-alerts-notice-plus-five);
   
   /* Spacing scale - Official Optics tokens */
   --op-space-scale-unit: 1rem; /* 10px */
@@ -354,6 +368,7 @@ html {
   --op-font-weight-bold: 700;
   
   --op-line-height-tight: 1.2;
+  --op-line-height-dense: 1.3;
   --op-line-height-normal: 1.5;
   --op-line-height-relaxed: 1.6;
   --op-line-height-densest: 1;

@@ -1,0 +1,17 @@
+/* Form overrides for proper theming */
+
+.form-hint {
+  color: var(--op-color-on-background);
+}
+
+.form-hint--success {
+  color: var(--op-color-alerts-notice-base);
+}
+
+.form-hint--warning {
+  color: var(--op-color-alerts-warning-base);
+}
+
+.form-hint--info {
+  color: var(--op-color-alerts-info-base);
+}

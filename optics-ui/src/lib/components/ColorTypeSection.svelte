@@ -117,27 +117,29 @@
         on:click={handleCollapse}
         aria-label={colorType.collapsed ? 'Expand' : 'Collapse'}
       >
-        <i class="ph-caret-down-bold {colorType.collapsed ? styles.collapsed : ''}"></i>
+        <i class="ph-bold ph-caret-down {colorType.collapsed ? styles.collapsed : ''}"></i>
       </button>
       
-      {#if isRenaming && colorType.isCustom}
-        <input
-          type="text"
-          class={styles.renameInput}
-          bind:value={renameValue}
-          on:blur={finishRename}
-          on:keydown={handleKeydown}
-          autofocus
-        />
-      {:else}
-        <h3 class={styles.title} on:dblclick={colorType.isCustom ? startRename : undefined}>
-          {colorType.name}
-        </h3>
-      {/if}
+      <div class={styles.titleContainer}>
+        {#if isRenaming && colorType.isCustom}
+          <input
+            type="text"
+            class={styles.renameInput}
+            bind:value={renameValue}
+            on:blur={finishRename}
+            on:keydown={handleKeydown}
+            autofocus
+          />
+        {:else}
+          <h3 class={styles.title} on:dblclick={colorType.isCustom ? startRename : undefined}>
+            {colorType.name}
+          </h3>
+        {/if}
 
-      {#if colorType.isCustom}
-        <span class={styles.customBadge}>Custom</span>
-      {/if}
+        {#if colorType.isCustom && !isRenaming}
+          <span class={styles.customBadge}>Custom</span>
+        {/if}
+      </div>
     </div>
     <div class={styles.colorControls}>
       <input 
@@ -172,23 +174,11 @@
     </div>
     
     <div class={styles.headerRight}>
-      {#if !colorType.collapsed}
-        <div class={styles.miniSummary}>
-          <span class={`${styles.miniValue} ${styles.pass}`}>{stats.pass}</span>
-          <span class={styles.miniSeparator}>/</span>
-          <span class={`${styles.miniValue} ${styles.fail}`}>{stats.fail}</span>
-        </div>
-      {/if}
-
-      {#if colorType.isCustom}
-        <button 
-          class={styles.deleteButton}
-          on:click={handleDelete}
-          aria-label="Delete color type"
-        >
-          <i class="ph-x-bold"></i>
-        </button>
-      {/if}
+      <div class={styles.miniSummary}>
+        <span class={`${styles.miniValue} ${styles.pass}`}>{stats.pass}</span>
+        <span class={styles.miniSeparator}>/</span>
+        <span class={`${styles.miniValue} ${styles.fail}`}>{stats.fail}</span>
+      </div>
 
       <label class={styles.toggle}>
         <input
@@ -198,6 +188,16 @@
         />
         <span class={styles.toggleSlider}></span>
       </label>
+
+      {#if colorType.isCustom}
+        <button 
+          class={styles.deleteButton}
+          on:click={handleDelete}
+          aria-label="Delete color type"
+        >
+          <i class="ph-bold ph-trash"></i>
+        </button>
+      {/if}
     </div>
   </div>
 

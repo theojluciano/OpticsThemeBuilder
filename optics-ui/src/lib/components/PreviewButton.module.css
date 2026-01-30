@@ -1,0 +1,27 @@
+/* Preview Button Component - Optics Design System */
+
+.previewButton {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+  padding: 0 var(--op-space-large);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-large);
+  color: var(--op-text-primary);
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-small);
+  cursor: pointer;
+  transition: all var(--op-transition-base);
+  height: 4.4rem;
+}
+
+.previewButton:hover {
+  background: var(--op-surface-hover);
+  border-color: var(--op-border-hover);
+}
+
+.previewButton:active {
+  background: var(--op-surface-active);
+  border-color: var(--op-border-active);
+}

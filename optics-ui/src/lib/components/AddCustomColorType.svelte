@@ -62,7 +62,7 @@
 <div class={styles.container}>
   {#if !isExpanded}
     <button class={styles.addButton} on:click={() => isExpanded = true}>
-      <i class="ph-plus-bold"></i>
+      <i class="ph-bold ph-plus"></i>
       Add Custom Color Type
     </button>
   {:else}

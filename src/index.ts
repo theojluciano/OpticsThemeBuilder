@@ -34,7 +34,8 @@ export {
   toRGBColor,
   createHsl,
   hslToRgb,
-  rgbToHsl
+  rgbToHsl,
+  createColorValue
 } from './color-utils';
 
 // File utilities
@@ -42,6 +43,8 @@ export {
   saveToFile,
   saveJsonToFile,
   ensureDirectory,
+  exportFiles,
+  FileExport,
 } from './file-utils';
 
 // Figma utilities
@@ -62,6 +65,8 @@ export {
   generateStandardsFooter,
   passesWCAG_AA,
   getWCAGLevel,
+  createContrastFailure,
+  collectFailureIfNeeded,
 } from './contrast-report-utils';
 
 // Console utilities

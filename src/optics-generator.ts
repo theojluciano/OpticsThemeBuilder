@@ -1,201 +1,127 @@
-import { formatHex, Rgb } from 'culori';
+import { formatHex } from 'culori';
 import { getContrastRatio } from './contrast';
 import { OpticsStopName, OpticsColorStop, OpticsPalette, HSLColor } from './types';
-import { parseColor, toHSLColor, toRGBColor, createHsl, hslToRgb } from './color-utils';
+import { parseColor, toHSLColor, toRGBColor, hslToRgb, createColorValue } from './color-utils';
 
 /**
- * Optics scale stop names in order from lightest to darkest (light mode perspective)
+ * Unified Optics scale configuration
+ * Consolidates all lightness values for different modes and color types
  */
-const OPTICS_STOPS: OpticsStopName[] = [
-  'plus-max',
-  'plus-eight',
-  'plus-seven',
-  'plus-six',
-  'plus-five',
-  'plus-four',
-  'plus-three',
-  'plus-two',
-  'plus-one',
-  'base',
-  'minus-one',
-  'minus-two',
-  'minus-three',
-  'minus-four',
-  'minus-five',
-  'minus-six',
-  'minus-seven',
-  'minus-eight',
-  'minus-max',
-];
-
-/**
- * Lightness values for each stop in light mode
- * Based on the Optics scale structure
- */
-const LIGHT_MODE_LIGHTNESS: Record<OpticsStopName, number> = {
-  'plus-max': 100,
-  'plus-eight': 98,
-  'plus-seven': 96,
-  'plus-six': 94,
-  'plus-five': 90,
-  'plus-four': 84,
-  'plus-three': 70,
-  'plus-two': 64,
-  'plus-one': 45,
-  'base': 40,
-  'minus-one': 36,
-  'minus-two': 32,
-  'minus-three': 28,
-  'minus-four': 24,
-  'minus-five': 20,
-  'minus-six': 16,
-  'minus-seven': 8,
-  'minus-eight': 4,
-  'minus-max': 0,
-};
-
-/**
- * Lightness values for each stop in dark mode
- */
-const DARK_MODE_LIGHTNESS: Record<OpticsStopName, number> = {
-  'plus-max': 12,
-  'plus-eight': 14,
-  'plus-seven': 16,
-  'plus-six': 20,
-  'plus-five': 24,
-  'plus-four': 26,
-  'plus-three': 29,
-  'plus-two': 32,
-  'plus-one': 35,
-  'base': 38,
-  'minus-one': 40,
-  'minus-two': 45,
-  'minus-three': 48,
-  'minus-four': 52,
-  'minus-five': 64,
-  'minus-six': 72,
-  'minus-seven': 80,
-  'minus-eight': 88,
-  'minus-max': 100,
-};
-
-/**
- * Foreground "on" colors for light mode
- */
-const LIGHT_MODE_ON: Record<OpticsStopName, number> = {
-  'plus-max': 0,
-  'plus-eight': 4,
-  'plus-seven': 8,
-  'plus-six': 16,
-  'plus-five': 20,
-  'plus-four': 24,
-  'plus-three': 20,
-  'plus-two': 16,
-  'plus-one': 100,
-  'base': 100,
-  'minus-one': 94,
-  'minus-two': 90,
-  'minus-three': 86,
-  'minus-four': 84,
-  'minus-five': 88,
-  'minus-six': 94,
-  'minus-seven': 96,
-  'minus-eight': 98,
-  'minus-max': 100,
-};
-
-/**
- * Foreground "on" colors for dark mode
- */
-const DARK_MODE_ON: Record<OpticsStopName, number> = {
-  'plus-max': 100,
-  'plus-eight': 88,
-  'plus-seven': 80,
-  'plus-six': 72,
-  'plus-five': 72,
-  'plus-four': 80,
-  'plus-three': 78,
-  'plus-two': 80,
-  'plus-one': 80,
-  'base': 100,
-  'minus-one': 98,
-  'minus-two': 98,
-  'minus-three': 98,
-  'minus-four': 2,
-  'minus-five': 2,
-  'minus-six': 8,
-  'minus-seven': 8,
-  'minus-eight': 4,
-  'minus-max': 0,
-};
-
-/**
- * Foreground "on-alt" colors for light mode
- */
-const LIGHT_MODE_ON_ALT: Record<OpticsStopName, number> = {
-  'plus-max': 20,
-  'plus-eight': 24,
-  'plus-seven': 28,
-  'plus-six': 26,
-  'plus-five': 40,
-  'plus-four': 4,
-  'plus-three': 10,
-  'plus-two': 6,
-  'plus-one': 95,
-  'base': 88,
-  'minus-one': 82,
-  'minus-two': 78,
-  'minus-three': 74,
-  'minus-four': 72,
-  'minus-five': 78,
-  'minus-six': 82,
-  'minus-seven': 84,
-  'minus-eight': 86,
-  'minus-max': 88,
-};
-
-/**
- * Foreground "on-alt" colors for dark mode
- */
-const DARK_MODE_ON_ALT: Record<OpticsStopName, number> = {
-  'plus-max': 78,
-  'plus-eight': 70,
-  'plus-seven': 64,
-  'plus-six': 96,
-  'plus-five': 86,
-  'plus-four': 92,
-  'plus-three': 98,
-  'plus-two': 92,
-  'plus-one': 98,
-  'base': 84,
-  'minus-one': 90,
-  'minus-two': 92,
-  'minus-three': 96,
-  'minus-four': 2,
-  'minus-five': 20,
-  'minus-six': 26,
-  'minus-seven': 34,
-  'minus-eight': 38,
-  'minus-max': 38,
-};
-
-/**
- * Create a color value from HSL
- */
-function createColorValue(h: number, s: number, l: number): {
-  hsl: HSLColor;
-  rgb: { r: number; g: number; b: number };
-  hex: string;
-} {
-  const hslColor = createHsl(h, s, l);
-  const rgbColor = hslToRgb(hslColor);
-  
-  return {
-    hsl: toHSLColor(hslColor),
-    rgb: toRGBColor(rgbColor),
-    hex: formatHex(rgbColor),
+interface OpticsStopConfig {
+  name: OpticsStopName;
+  lightMode: {
+    background: number;
+    on: number;
+    onAlt: number;
+  };
+  darkMode: {
+    background: number;
+    on: number;
+    onAlt: number;
   };
 }
+
+/**
+ * Complete Optics scale configuration
+ * Single source of truth for all lightness values
+ */
+const OPTICS_SCALE: OpticsStopConfig[] = [
+  {
+    name: 'plus-max',
+    lightMode: { background: 100, on: 0, onAlt: 20 },
+    darkMode: { background: 12, on: 100, onAlt: 78 },
+  },
+  {
+    name: 'plus-eight',
+    lightMode: { background: 98, on: 4, onAlt: 24 },
+    darkMode: { background: 14, on: 88, onAlt: 70 },
+  },
+  {
+    name: 'plus-seven',
+    lightMode: { background: 96, on: 8, onAlt: 28 },
+    darkMode: { background: 16, on: 80, onAlt: 64 },
+  },
+  {
+    name: 'plus-six',
+    lightMode: { background: 94, on: 16, onAlt: 26 },
+    darkMode: { background: 20, on: 72, onAlt: 96 },
+  },
+  {
+    name: 'plus-five',
+    lightMode: { background: 90, on: 20, onAlt: 40 },
+    darkMode: { background: 24, on: 72, onAlt: 86 },
+  },
+  {
+    name: 'plus-four',
+    lightMode: { background: 84, on: 24, onAlt: 4 },
+    darkMode: { background: 26, on: 80, onAlt: 92 },
+  },
+  {
+    name: 'plus-three',
+    lightMode: { background: 70, on: 20, onAlt: 10 },
+    darkMode: { background: 29, on: 78, onAlt: 98 },
+  },
+  {
+    name: 'plus-two',
+    lightMode: { background: 64, on: 16, onAlt: 6 },
+    darkMode: { background: 32, on: 80, onAlt: 92 },
+  },
+  {
+    name: 'plus-one',
+    lightMode: { background: 45, on: 100, onAlt: 95 },
+    darkMode: { background: 35, on: 80, onAlt: 98 },
+  },
+  {
+    name: 'base',
+    lightMode: { background: 40, on: 100, onAlt: 88 },
+    darkMode: { background: 38, on: 100, onAlt: 84 },
+  },
+  {
+    name: 'minus-one',
+    lightMode: { background: 36, on: 94, onAlt: 82 },
+    darkMode: { background: 40, on: 98, onAlt: 90 },
+  },
+  {
+    name: 'minus-two',
+    lightMode: { background: 32, on: 90, onAlt: 78 },
+    darkMode: { background: 45, on: 98, onAlt: 92 },
+  },
+  {
+    name: 'minus-three',
+    lightMode: { background: 28, on: 86, onAlt: 74 },
+    darkMode: { background: 48, on: 98, onAlt: 96 },
+  },
+  {
+    name: 'minus-four',
+    lightMode: { background: 24, on: 84, onAlt: 72 },
+    darkMode: { background: 52, on: 2, onAlt: 2 },
+  },
+  {
+    name: 'minus-five',
+    lightMode: { background: 20, on: 88, onAlt: 78 },
+    darkMode: { background: 64, on: 2, onAlt: 20 },
+  },
+  {
+    name: 'minus-six',
+    lightMode: { background: 16, on: 94, onAlt: 82 },
+    darkMode: { background: 72, on: 8, onAlt: 26 },
+  },
+  {
+    name: 'minus-seven',
+    lightMode: { background: 8, on: 96, onAlt: 84 },
+    darkMode: { background: 80, on: 8, onAlt: 34 },
+  },
+  {
+    name: 'minus-eight',
+    lightMode: { background: 4, on: 98, onAlt: 86 },
+    darkMode: { background: 88, on: 4, onAlt: 38 },
+  },
+  {
+    name: 'minus-max',
+    lightMode: { background: 0, on: 100, onAlt: 88 },
+    darkMode: { background: 100, on: 0, onAlt: 38 },
+  },
+];
 
 /**
  * Generate an Optics-compatible color palette
@@ -217,30 +143,30 @@ export function generateOpticsPalette(
   const h = baseHsl.h || 0;
   const s = (baseHsl.s || 0) * 100;
   
-  // Generate all stops
-  const stops: OpticsColorStop[] = OPTICS_STOPS.map((stopName) => {
-    // Background colors
-    const lightBg = createColorValue(h, s, LIGHT_MODE_LIGHTNESS[stopName]);
-    const darkBg = createColorValue(h, s, DARK_MODE_LIGHTNESS[stopName]);
+  // Generate all stops using the unified configuration
+  const stops: OpticsColorStop[] = OPTICS_SCALE.map((config) => {
+    // Background colors for both modes
+    const lightBg = createColorValue(h, s, config.lightMode.background);
+    const darkBg = createColorValue(h, s, config.darkMode.background);
     
-    // Foreground "on" colors
-    const lightOn = createColorValue(h, s, LIGHT_MODE_ON[stopName]);
-    const darkOn = createColorValue(h, s, DARK_MODE_ON[stopName]);
+    // Foreground "on" colors for both modes
+    const lightOn = createColorValue(h, s, config.lightMode.on);
+    const darkOn = createColorValue(h, s, config.darkMode.on);
     
-    // Foreground "on-alt" colors
-    const lightOnAlt = createColorValue(h, s, LIGHT_MODE_ON_ALT[stopName]);
-    const darkOnAlt = createColorValue(h, s, DARK_MODE_ON_ALT[stopName]);
+    // Foreground "on-alt" colors for both modes
+    const lightOnAlt = createColorValue(h, s, config.lightMode.onAlt);
+    const darkOnAlt = createColorValue(h, s, config.darkMode.onAlt);
     
     // Calculate contrast ratios
-    const lightBgRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_LIGHTNESS[stopName]));
-    const darkBgRgb = hslToRgb(createHsl(h, s, DARK_MODE_LIGHTNESS[stopName]));
-    const lightOnRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_ON[stopName]));
-    const darkOnRgb = hslToRgb(createHsl(h, s, DARK_MODE_ON[stopName]));
-    const lightOnAltRgb = hslToRgb(createHsl(h, s, LIGHT_MODE_ON_ALT[stopName]));
-    const darkOnAltRgb = hslToRgb(createHsl(h, s, DARK_MODE_ON_ALT[stopName]));
+    const lightBgRgb = hslToRgb(lightBg.hsl as any);
+    const darkBgRgb = hslToRgb(darkBg.hsl as any);
+    const lightOnRgb = hslToRgb(lightOn.hsl as any);
+    const darkOnRgb = hslToRgb(darkOn.hsl as any);
+    const lightOnAltRgb = hslToRgb(lightOnAlt.hsl as any);
+    const darkOnAltRgb = hslToRgb(darkOnAlt.hsl as any);
     
     return {
-      name: stopName,
+      name: config.name,
       background: {
         light: lightBg,
         dark: darkBg,
@@ -277,7 +203,7 @@ export function generateOpticsPalette(
     stops,
     metadata: {
       generatedAt: new Date().toISOString(),
-      totalStops: OPTICS_STOPS.length,
+      totalStops: OPTICS_SCALE.length,
       format: 'optics',
     },
   };

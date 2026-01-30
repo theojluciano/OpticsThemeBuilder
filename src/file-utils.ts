@@ -30,3 +30,27 @@ export function ensureDirectory(dirPath: string): void {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 }
+
+/**
+ * Export multiple files at once
+ * Returns the paths of all exported files
+ */
+export interface FileExport {
+  label: string;
+  filename: string;
+  content: string;
+}
+
+export function exportFiles(outputDir: string, files: FileExport[]): string[] {
+  ensureDirectory(outputDir);
+  
+  const exportedPaths: string[] = [];
+  
+  files.forEach(file => {
+    const filepath = path.join(outputDir, file.filename);
+    saveToFile(file.content, filepath);
+    exportedPaths.push(filepath);
+  });
+  
+  return exportedPaths;
+}

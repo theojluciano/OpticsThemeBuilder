@@ -43,6 +43,6 @@
 </script>
 
 <button class={styles.exportButton} on:click={handleExport}>
-  <i class="ph-figma-logo-bold"></i>
+  <i class="ph-bold ph-figma-logo"></i>
   Export for Figma
 </button>

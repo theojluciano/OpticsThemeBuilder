@@ -20,6 +20,7 @@
 }
 
 .name {
+  font-size: var(--op-font-small);
   font-weight: var(--op-font-weight-semibold);
   color: var(--op-text-primary);
 }
