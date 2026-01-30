@@ -44,7 +44,7 @@ function createDefaultColorType(
     name,
     enabled: true,
     isCustom,
-    collapsed: false,
+    collapsed: true,
     h,
     s,
     lightBg: { ...LIGHT_MODE_BG },
