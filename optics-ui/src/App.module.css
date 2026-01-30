@@ -28,7 +28,7 @@
 .headerControls {
   display: flex;
   align-items: center;
-  gap: var(--op-space-large);
+  gap: var(--op-space-small);
   flex: 1;
   justify-content: flex-end;
 }
