@@ -1,6 +1,6 @@
 <script lang="ts">
   import { colorTypes } from '../stores/color-types';
-  import { makeColor, getContrast } from '../utils/colors';
+  import { makeColor, getContrast, getContrastLevel, getContrastLabel, getOverallStatus, type ContrastLevel } from '../utils/colors';
   import type { OpticsStopName } from '../data/defaults';
   import styles from './ColorStopCard.module.css';
 
@@ -32,13 +32,20 @@
   $: onContrast = getContrast(bgColor, onColor);
   $: onAltContrast = getContrast(bgColor, onAltColor);
 
-  $: onPass = onContrast >= 4.5;
-  $: onAltPass = onAltContrast >= 4.5;
-  $: hasFailure = !onPass || !onAltPass;
+  $: onLevel = getContrastLevel(onContrast);
+  $: onAltLevel = getContrastLevel(onAltContrast);
+  $: cardStatus = getOverallStatus([onLevel, onAltLevel]);
+  
   $: textColor = bgValue > 50 ? '#000' : '#fff';
+
+  // Test configurations for DRY rendering
+  $: tests = [
+    { label: 'on', lightness: onValue, contrast: onContrast, level: onLevel },
+    { label: 'on-alt', lightness: onAltValue, contrast: onAltContrast, level: onAltLevel }
+  ];
 </script>
 
-<div class={`${styles.card} ${hasFailure ? styles.fail : ''}`}>
+<div class={`${styles.card} ${styles[cardStatus]}`}>
   <div class={styles.header}>
     <span class={styles.name}>{stop}</span>
     <span class={styles.lightness}>L: {bgValue}%</span>
@@ -98,17 +105,16 @@
   </div>
 
   <div class={styles.tests}>
-    <div class={`${styles.test} ${onPass ? styles.pass : styles.fail}`}>
-      <span>on (H:{Math.round(h)}° S:{Math.round(s)}% L:{onValue}%)</span>
-      <span class={`${styles.value} ${onPass ? styles.pass : styles.fail}`}>
-        {onContrast.toFixed(2)}:1
-      </span>
-    </div>
-    <div class={`${styles.test} ${onAltPass ? styles.pass : styles.fail}`}>
-      <span>on-alt (H:{Math.round(h)}° S:{Math.round(s)}% L:{onAltValue}%)</span>
-      <span class={`${styles.value} ${onAltPass ? styles.pass : styles.fail}`}>
-        {onAltContrast.toFixed(2)}:1
-      </span>
-    </div>
+    {#each tests as test}
+      <div class={`${styles.test} ${styles[test.level]}`}>
+        <span>{test.label} (H:{Math.round(h)}° S:{Math.round(s)}% L:{test.lightness}%)</span>
+        <span class={`${styles.value} ${styles[test.level]}`}>
+          {#if test.level !== 'fail'}
+            <span class={styles.label}>{getContrastLabel(test.level)}</span>
+          {/if}
+          {test.contrast.toFixed(2)}:1
+        </span>
+      </div>
+    {/each}
   </div>
 </div>

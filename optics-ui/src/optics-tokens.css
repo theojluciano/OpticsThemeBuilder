@@ -286,6 +286,8 @@ html {
   /* Status tokens - Original colors */
   --op-status-success: #10b981;
   --op-status-success-bg: rgba(16, 185, 129, 0.1);
+  --op-status-warning: #f59e0b;
+  --op-status-warning-bg: rgba(245, 158, 11, 0.1);
   --op-status-danger: #ef4444;
   --op-status-danger-bg: rgba(239, 68, 68, 0.1);
   

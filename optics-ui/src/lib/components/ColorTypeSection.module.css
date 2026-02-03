@@ -142,6 +142,10 @@
   color: var(--op-status-danger);
 }
 
+.miniValue.aa {
+  color: var(--op-status-warning);
+}
+
 .miniSeparator {
   color: #555;
 }

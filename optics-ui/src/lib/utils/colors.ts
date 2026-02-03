@@ -56,3 +56,39 @@ export function parseBaseColor(colorInput: string): { h: number; s: number } | n
     s: (hsl.s || 0) * 100
   };
 }
+
+/**
+ * Contrast level type for WCAG standards
+ */
+export type ContrastLevel = 'aaa' | 'aa' | 'fail';
+
+/**
+ * Get the WCAG contrast level for a given contrast ratio
+ * AAA: >= 7:1
+ * AA: >= 4.5:1 and < 7:1
+ * Fail: < 4.5:1
+ */
+export function getContrastLevel(ratio: number): ContrastLevel {
+  if (ratio >= 7) return 'aaa';
+  if (ratio >= 4.5) return 'aa';
+  return 'fail';
+}
+
+/**
+ * Get the display label for a contrast level
+ */
+export function getContrastLabel(level: ContrastLevel): string {
+  if (level === 'aaa') return 'AAA';
+  if (level === 'aa') return 'AA';
+  return '';
+}
+
+/**
+ * Calculate overall status from multiple contrast levels
+ * Priority: fail > aa > aaa
+ */
+export function getOverallStatus(levels: ContrastLevel[]): ContrastLevel {
+  if (levels.some(l => l === 'fail')) return 'fail';
+  if (levels.some(l => l === 'aa')) return 'aa';
+  return 'aaa';
+}

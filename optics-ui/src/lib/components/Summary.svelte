@@ -1,7 +1,7 @@
 <script lang="ts">
   import { palette } from '../stores/palette';
   import { OPTICS_STOPS } from '../data/defaults';
-  import { makeColor, getContrast } from '../utils/colors';
+  import { calculateContrastStats } from '../utils/contrast-stats';
   import styles from './Summary.module.css';
 
   $: mode = $palette.mode;
@@ -9,29 +9,28 @@
   $: onValues = mode === 'light' ? $palette.lightOn : $palette.darkOn;
   $: onAltValues = mode === 'light' ? $palette.lightOnAlt : $palette.darkOnAlt;
 
-  $: stats = OPTICS_STOPS.reduce((acc, stop) => {
-    const bgColor = makeColor($palette.h, $palette.s, bgValues[stop]);
-    const onColor = makeColor($palette.h, $palette.s, onValues[stop]);
-    const onAltColor = makeColor($palette.h, $palette.s, onAltValues[stop]);
-    
-    const onContrast = getContrast(bgColor, onColor);
-    const onAltContrast = getContrast(bgColor, onAltColor);
-    
-    if (onContrast >= 4.5) acc.pass++; else acc.fail++;
-    if (onAltContrast >= 4.5) acc.pass++; else acc.fail++;
-    
-    return acc;
-  }, { pass: 0, fail: 0 });
+  $: stats = calculateContrastStats(
+    OPTICS_STOPS,
+    $palette.h,
+    $palette.s,
+    bgValues,
+    onValues,
+    onAltValues
+  );
 
-  $: total = stats.pass + stats.fail;
+  $: total = stats.aaa + stats.aa + stats.fail;
 </script>
 
 <div class={styles.summary}>
   <h3 class={styles.title}>Contrast Summary</h3>
   <div class={styles.stats}>
     <div class={styles.stat}>
-      <div class="{styles.value} {styles.pass}">{stats.pass}</div>
-      <div class={styles.label}>Passing</div>
+      <div class="{styles.value} {styles.pass}">{stats.aaa}</div>
+      <div class={styles.label}>AAA Pass</div>
+    </div>
+    <div class={styles.stat}>
+      <div class="{styles.value} {styles.aa}">{stats.aa}</div>
+      <div class={styles.label}>AA Only</div>
     </div>
     <div class={styles.stat}>
       <div class="{styles.value} {styles.fail}">{stats.fail}</div>
@@ -43,5 +42,3 @@
     </div>
   </div>
 </div>
-
-

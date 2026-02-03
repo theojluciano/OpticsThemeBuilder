@@ -2,8 +2,8 @@
   import ColorStopCard from './ColorStopCard.svelte';
   import { colorTypes } from '../stores/color-types';
   import { OPTICS_STOPS } from '../data/defaults';
-  import { makeColor, getContrast } from '../utils/colors';
   import { parseBaseColor } from '../utils/colors';
+  import { calculateContrastStats } from '../utils/contrast-stats';
   import type { ColorTypeConfig } from '../stores/color-types';
   import * as culori from 'culori';
   import styles from './ColorTypeSection.module.css';
@@ -55,21 +55,16 @@
   $: onValues = mode === 'light' ? colorType.lightOn : colorType.darkOn;
   $: onAltValues = mode === 'light' ? colorType.lightOnAlt : colorType.darkOnAlt;
 
-  $: stats = OPTICS_STOPS.reduce((acc, stop) => {
-    const bgColor = makeColor(colorType.h, colorType.s, bgValues[stop]);
-    const onColor = makeColor(colorType.h, colorType.s, onValues[stop]);
-    const onAltColor = makeColor(colorType.h, colorType.s, onAltValues[stop]);
-    
-    const onContrast = getContrast(bgColor, onColor);
-    const onAltContrast = getContrast(bgColor, onAltColor);
-    
-    if (onContrast >= 4.5) acc.pass++; else acc.fail++;
-    if (onAltContrast >= 4.5) acc.pass++; else acc.fail++;
-    
-    return acc;
-  }, { pass: 0, fail: 0 });
+  $: stats = calculateContrastStats(
+    OPTICS_STOPS,
+    colorType.h,
+    colorType.s,
+    bgValues,
+    onValues,
+    onAltValues
+  );
 
-  $: total = stats.pass + stats.fail;
+  $: total = stats.aaa + stats.aa + stats.fail;
 
   function handleToggle() {
     colorTypes.toggleColorType(colorType.id);
@@ -175,7 +170,9 @@
     
     <div class={styles.headerRight}>
       <div class={styles.miniSummary}>
-        <span class={`${styles.miniValue} ${styles.pass}`}>{stats.pass}</span>
+        <span class={`${styles.miniValue} ${styles.pass}`}>{stats.aaa}</span>
+        <span class={styles.miniSeparator}>/</span>
+        <span class={`${styles.miniValue} ${styles.aa}`}>{stats.aa}</span>
         <span class={styles.miniSeparator}>/</span>
         <span class={`${styles.miniValue} ${styles.fail}`}>{stats.fail}</span>
       </div>
