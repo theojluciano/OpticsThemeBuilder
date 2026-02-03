@@ -8,12 +8,23 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 
 ## Recent Updates ✨
 
-**v2.1 - Code Refactoring & New Utilities (Current)**
+**v2.2 - Three-Tier Contrast Indicators (Current)**
+- 🎯 **AAA/AA/Fail System**: Visual indicators now show three levels of WCAG compliance instead of just pass/fail
+- 🟢 **AAA (≥7:1)**: Green indicators for contrast ratios that meet strict AAA standards
+- 🟡 **AA-only (≥4.5:1, <7:1)**: Yellow/amber indicators for ratios that meet AA but not AAA standards
+- 🔴 **Fail (<4.5:1)**: Red indicators for ratios below minimum accessibility standards
+- 🏷️ **Level Labels**: Contrast ratios display with "AAA" or "AA" badges for quick identification
+- 🎨 **Smart Borders**: Card borders reflect worst-case status (red overrides yellow, yellow overrides green)
+- 📊 **Enhanced Summaries**: Stats now show AAA count / AA count / Fail count (e.g., "24 / 8 / 6")
+- 🔧 **DRY Refactoring**: Extracted shared contrast utilities reducing duplication by 75+ lines
+- 🎨 **Status Token Added**: New `--op-status-warning` design token for consistent yellow/amber indicators
+
+**v2.1 - Code Refactoring & New Utilities**
 - 🔧 **Major Refactoring**: Cleaner, DRY codebase with ~200 lines reduced while adding utilities
 - 🎨 **Unified Color Builder**: New `createColorValue()` utility eliminates duplication across 5+ locations
 - 📊 **Consolidated Scale Data**: Optics scale data reduced from 6 objects (140 lines) to 1 structure (70 lines)
 - ⚡ **Shared Utilities**: New contrast failure collection and batch file export utilities
-- 🔄 **Improved Parsing**: HSL input now handles both normalized (0-1) and percentage (0-100) formats
+- 🔄 **Improved Parsing**: HSL input now handles both normalized (0-1) and percentage (0-100%) formats
 - 📦 **Better Patterns**: Builder, Factory, and functional programming patterns throughout
 - ✅ **100% Test Coverage**: All 169 tests passing with clean TypeScript compilation
 
@@ -162,12 +173,19 @@ Each color stop card has three sliders:
 - The file contains all enabled color types with their current mode settings
 - Import the file directly into Figma as Variables
 
-**Tips for achieving WCAG AA contrast:**
+**Understanding Contrast Indicators:**
+- **Green (AAA)**: Contrast ratio ≥7:1 - meets strict AAA standards, displays "AAA" badge
+- **Yellow (AA)**: Contrast ratio ≥4.5:1 but <7:1 - meets minimum AA standards, displays "AA" badge  
+- **Red (Fail)**: Contrast ratio <4.5:1 - fails accessibility standards, no badge
+- Card borders reflect the worst test result (red overrides yellow, yellow overrides green)
+- Summary shows three counts: AAA / AA / Fail (e.g., "24 / 8 / 6" = 24 AAA, 8 AA-only, 6 failures)
+
+**Tips for achieving WCAG compliance:**
 - Light backgrounds (L>50%) need dark foregrounds (L<40%)
 - Dark backgrounds (L<50%) need light foregrounds (L>60%)
-- Aim for 40%+ lightness difference between background and foreground
-- Cards with red borders have failing tests - adjust sliders until green
-- Use the contrast summary to track overall progress per color type
+- Aim for 40%+ lightness difference for AA, 60%+ for AAA
+- Adjust sliders to turn yellow indicators green for better accessibility
+- Use the contrast summary to track AAA/AA/Fail counts per color type
 
 **UI Design System:**
 The interactive UI is built using the Optics design system it generates:
@@ -252,15 +270,20 @@ The report uses Optics naming (e.g., `primary/minus-four-on`) so you can immedia
 
 ### Interactive UI Contrast Checking
 
-The web UI provides real-time WCAG AA contrast validation:
+The web UI provides real-time WCAG contrast validation with three-tier visual feedback:
 
-- **Live contrast ratios**: Each color stop card displays contrast ratios for both "on" and "on-alt" foregrounds
-- **Pass/fail indicators**: Visual green (passing) or red (failing) indicators with 4.5:1 minimum threshold
-- **Summary dashboard**: Shows total passing/failing tests across all 19 stops
+- **Three-tier indicators**: 
+  - 🟢 Green (AAA): ≥7:1 contrast ratio with "AAA" badge
+  - 🟡 Yellow (AA): ≥4.5:1 but <7:1 with "AA" badge  
+  - 🔴 Red (Fail): <4.5:1, no badge
+- **Smart card borders**: Overall border color reflects worst test (red > yellow > green)
+- **Live contrast ratios**: Each color stop card displays contrast for both "on" and "on-alt" foregrounds
+- **Enhanced summaries**: Shows AAA count / AA count / Fail count (e.g., "24 / 8 / 6")
+- **Summary dashboard**: Section-level and global statistics with color-coded counts
 - **Mode-specific**: Independent contrast checking for Light and Dark modes
 - **Instant feedback**: Contrast recalculates as you adjust luminosity sliders
 
-This allows you to fine-tune your palette interactively until all combinations meet WCAG AA standards.
+This allows you to fine-tune your palette interactively to meet WCAG AA standards or exceed them with AAA compliance.
 
 ### CLI Contrast Analysis
 
@@ -858,7 +881,7 @@ The export format has been validated against Figma plugin exports:
 
 ## Code Architecture
 
-### Refactoring Improvements (v2.1)
+### Refactoring Improvements (v2.1 & v2.2)
 
 The codebase has undergone significant refactoring to improve maintainability, reduce duplication, and establish better patterns. See [REFACTORING.md](REFACTORING.md) for complete details.
 
@@ -884,17 +907,26 @@ The codebase has undergone significant refactoring to improve maintainability, r
 - Batch file export with consistent error handling
 - Display logic separated from business logic
 
-**5. Enhanced Type Safety**
+**5. Contrast Level Utilities (v2.2)**
+- `getContrastLevel()` - Single source of truth for AAA/AA/Fail determination
+- `getContrastLabel()` - Consistent badge display ("AAA", "AA", "")
+- `getOverallStatus()` - Priority-based status calculation (fail > aa > aaa)
+- `calculateContrastStats()` - DRY stats aggregation for all components
+- Eliminates 75+ lines of duplicate contrast logic
+
+**6. Enhanced Type Safety**
 - Comprehensive TypeScript interfaces
+- `ContrastLevel` type for three-tier system
 - Better IntelliSense support
 - Compile-time error detection
 
 #### Code Quality Metrics
 
-- **Lines Reduced**: ~200 lines removed while adding utilities
+- **Lines Reduced**: ~275 lines removed while adding utilities (v2.1: 200, v2.2: 75)
 - **Test Coverage**: 100% maintained (169 tests passing)
-- **Duplication**: Major patterns eliminated across 5+ locations
+- **Duplication**: Major patterns eliminated across 8+ locations
 - **Build Status**: Clean TypeScript compilation with zero errors
+- **Component Efficiency**: ColorStopCard reduced from 40 to 9 lines of template markup
 
 #### Design Patterns Used
 
@@ -917,6 +949,15 @@ src/
 ├── figma-utils.ts            # Figma token creation
 ├── file-utils.ts             # File I/O and batch export
 ├── console-utils.ts          # CLI output formatting
+
+optics-ui/src/lib/
+├── utils/
+│   ├── colors.ts             # Color utilities + contrast level functions
+│   └── contrast-stats.ts     # Shared contrast statistics calculation
+├── components/
+│   ├── Summary.svelte        # Uses calculateContrastStats()
+│   ├── ColorTypeSection.svelte  # Uses calculateContrastStats()
+│   └── ColorStopCard.svelte  # Uses getContrastLevel() utilities
 ├── cli.ts                    # Command-line interface
 ├── index.ts                  # Public API exports
 └── types.ts                  # TypeScript type definitions
