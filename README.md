@@ -1,4 +1,5 @@
-<img width="1071" height="809" alt="image" src="https://github.com/user-attachments/assets/8c9c6036-22cc-408a-b102-ac6e60f549bc" />
+<img width="968" height="783" alt="image" src="https://github.com/user-attachments/assets/ff898205-45c1-42c2-a05a-d1cec994d70b" />
+<img width="967" height="809" alt="image" src="https://github.com/user-attachments/assets/91ff3d66-5cc9-4fad-b63a-d207936ce5b2" />
 
 # OpticsThemeBuilder 🎨
 
