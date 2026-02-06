@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   gap: var(--op-space-x-small);
-  padding: 0 var(--op-space-large);
+  padding: 0 var(--op-space-medium);
   background: var(--op-surface-base);
   border: 1px solid var(--op-border-default);
   border-radius: var(--op-radius-large);
@@ -13,12 +13,13 @@
   font-size: var(--op-font-small);
   cursor: pointer;
   transition: all var(--op-transition-base);
-  height: 4.4rem;
+  height: 3.6rem;
 }
 
 .previewButton:hover {
-  background: var(--op-surface-hover);
-  border-color: var(--op-border-hover);
+  background: var(--op-color-neutral-minus-five);
+  color: var(--op-color-neutral-on-minus-five);
+  border-color: var(--op-color-neutral-minus-one);
 }
 
 .previewButton:active {
