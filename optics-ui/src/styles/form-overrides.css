@@ -1,5 +1,11 @@
 /* Form overrides for proper theming */
 
+/* Ensure form controls use the correct font */
+.form-control,
+textarea.form-control {
+  font-family: var(--op-font-family);
+}
+
 .form-hint {
   color: var(--op-color-on-background);
 }

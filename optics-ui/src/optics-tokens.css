@@ -347,7 +347,7 @@ html {
   --op-border-width-x-large: 4px;
   
   /* Typography */
-  --op-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --op-font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --op-font-family-mono: 'Monaco', 'Courier New', monospace;
   
   /* Font sizes - Optics naming convention */
