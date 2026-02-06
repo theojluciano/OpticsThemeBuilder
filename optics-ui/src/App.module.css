@@ -84,8 +84,8 @@
 }
 
 .toggle button:hover {
-  background: #555;
-  color: var(--op-text-primary);
+  background: var(--op-color-neutral-minus-five);
+  color: var(--op-color-neutral-on-minus-five);
 }
 
 .toggle button.active:hover {
