@@ -5,6 +5,7 @@ import {
   hslToRgb,
   rgbToHsl,
   createHsl,
+  createColorValue,
 } from '../src/color-utils';
 import { HSLColor } from '../src/types';
 
@@ -230,6 +231,47 @@ describe('color-utils', () => {
       expect(resultHsl.h).toBeCloseTo(originalHsl.h || 0, 0);
       expect(resultHsl.s).toBeCloseTo(originalHsl.s || 0, 2);
       expect(resultHsl.l).toBeCloseTo(originalHsl.l || 0, 2);
+    });
+  });
+
+  describe('createColorValue', () => {
+    it('should create a complete color value object', () => {
+      const result = createColorValue(217, 91, 60);
+      
+      expect(result).toHaveProperty('hsl');
+      expect(result).toHaveProperty('rgb');
+      expect(result).toHaveProperty('hex');
+      
+      expect(result.hsl.h).toBeCloseTo(217, 0);
+      expect(result.hsl.s).toBeCloseTo(0.91, 2);
+      expect(result.hsl.l).toBeCloseTo(0.60, 2);
+      
+      expect(result.hex).toMatch(/^#[0-9a-f]{6}$/i);
+      
+      expect(result.rgb.r).toBeGreaterThanOrEqual(0);
+      expect(result.rgb.r).toBeLessThanOrEqual(1);
+      expect(result.rgb.g).toBeGreaterThanOrEqual(0);
+      expect(result.rgb.g).toBeLessThanOrEqual(1);
+      expect(result.rgb.b).toBeGreaterThanOrEqual(0);
+      expect(result.rgb.b).toBeLessThanOrEqual(1);
+    });
+
+    it('should create white color', () => {
+      const result = createColorValue(0, 0, 100);
+      
+      expect(result.hex.toLowerCase()).toBe('#ffffff');
+      expect(result.rgb.r).toBeCloseTo(1, 2);
+      expect(result.rgb.g).toBeCloseTo(1, 2);
+      expect(result.rgb.b).toBeCloseTo(1, 2);
+    });
+
+    it('should create black color', () => {
+      const result = createColorValue(0, 0, 0);
+      
+      expect(result.hex.toLowerCase()).toBe('#000000');
+      expect(result.rgb.r).toBeCloseTo(0, 2);
+      expect(result.rgb.g).toBeCloseTo(0, 2);
+      expect(result.rgb.b).toBeCloseTo(0, 2);
     });
   });
 

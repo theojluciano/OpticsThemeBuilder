@@ -157,13 +157,14 @@ export function generateOpticsPalette(
     const lightOnAlt = createColorValue(h, s, config.lightMode.onAlt);
     const darkOnAlt = createColorValue(h, s, config.darkMode.onAlt);
     
-    // Calculate contrast ratios
-    const lightBgRgb = hslToRgb(lightBg.hsl as any);
-    const darkBgRgb = hslToRgb(darkBg.hsl as any);
-    const lightOnRgb = hslToRgb(lightOn.hsl as any);
-    const darkOnRgb = hslToRgb(darkOn.hsl as any);
-    const lightOnAltRgb = hslToRgb(lightOnAlt.hsl as any);
-    const darkOnAltRgb = hslToRgb(darkOnAlt.hsl as any);
+    // Calculate contrast ratios using RGB values from createColorValue
+    // Convert RGBColor to culori Rgb format
+    const lightBgRgb = { mode: 'rgb' as const, ...lightBg.rgb };
+    const darkBgRgb = { mode: 'rgb' as const, ...darkBg.rgb };
+    const lightOnRgb = { mode: 'rgb' as const, ...lightOn.rgb };
+    const darkOnRgb = { mode: 'rgb' as const, ...darkOn.rgb };
+    const lightOnAltRgb = { mode: 'rgb' as const, ...lightOnAlt.rgb };
+    const darkOnAltRgb = { mode: 'rgb' as const, ...darkOnAlt.rgb };
     
     return {
       name: config.name,
