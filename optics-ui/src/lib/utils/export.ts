@@ -1,4 +1,4 @@
-import * as culori from 'culori';
+import { parse, converter, formatHex } from 'culori';
 import type { OpticsStopName } from '../data/defaults';
 import { OPTICS_STOPS } from '../data/defaults';
 
@@ -14,96 +14,77 @@ export interface PaletteData {
   }>;
 }
 
+const toRgb = converter('rgb');
+
+function createColorToken(h: number, s: number, l: number) {
+  const rgb = toRgb({ mode: 'hsl', h, s: s / 100, l: l / 100 })!;
+  return {
+    $type: 'color',
+    $value: {
+      colorSpace: 'srgb',
+      components: [rgb.r, rgb.g, rgb.b],
+      alpha: 1.0,
+      hex: formatHex(rgb)
+    }
+  };
+}
+
+/**
+ * Parse an OpticsStopName into its group prefix and JSON key.
+ * e.g. 'plus-max' → { group: 'plus', key: 'max' }
+ *      'base'     → { group: 'base', key: 'base' }
+ */
+export function parseStopName(stop: OpticsStopName): { group: 'base' | 'plus' | 'minus'; key: string } {
+  if (stop === 'base') return { group: 'base', key: 'base' };
+  const dashIndex = stop.indexOf('-');
+  return {
+    group: stop.slice(0, dashIndex) as 'plus' | 'minus',
+    key: stop.slice(dashIndex + 1)
+  };
+}
+
 export function exportFigmaJSON(palettes: PaletteData[]): string {
   if (palettes.length === 0) {
     return '{}';
   }
 
   const mode = palettes[0].mode;
-  const figmaData: any = {
+  const figmaData: Record<string, any> = {
     $extensions: {
       'com.figma.modeName': mode === 'light' ? 'Light' : 'Dark'
     }
   };
 
   palettes.forEach(data => {
-    figmaData[data.name] = {
+    const entry: Record<string, any> = {
       base: null,
       plus: {},
       minus: {},
-      on: {
-        base: null,
-        'base-alt': null,
-        plus: {},
-        minus: {}
-      }
+      on: { base: null, 'base-alt': null, plus: {}, minus: {} }
     };
 
     OPTICS_STOPS.forEach(stop => {
       const values = data.stops[stop];
-      
-      // Convert HSL directly to RGB to avoid rounding errors from hex conversion
-      const bgHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.bg / 100 });
-      const onHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.on / 100 });
-      const onAltHsl = culori.hsl({ h: data.h, s: data.s / 100, l: values.onAlt / 100 });
-      
-      const bgRgb = culori.rgb(bgHsl)!;
-      const onRgb = culori.rgb(onHsl)!;
-      const onAltRgb = culori.rgb(onAltHsl)!;
-      
-      // Generate hex values from RGB for display purposes
-      const bgHex = culori.formatHex(bgRgb);
-      const onHex = culori.formatHex(onRgb);
-      const onAltHex = culori.formatHex(onAltRgb);
-      
-      const bgVar = {
-        $type: 'color',
-        $value: {
-          colorSpace: 'srgb',
-          components: [bgRgb.r, bgRgb.g, bgRgb.b],
-          alpha: 1.0,
-          hex: bgHex
-        }
-      };
-      
-      const onVar = {
-        $type: 'color',
-        $value: {
-          colorSpace: 'srgb',
-          components: [onRgb.r, onRgb.g, onRgb.b],
-          alpha: 1.0,
-          hex: onHex
-        }
-      };
-      
-      const onAltVar = {
-        $type: 'color',
-        $value: {
-          colorSpace: 'srgb',
-          components: [onAltRgb.r, onAltRgb.g, onAltRgb.b],
-          alpha: 1.0,
-          hex: onAltHex
-        }
-      };
-      
-      if (stop === 'base') {
-        figmaData[data.name].base = bgVar;
-        figmaData[data.name].on.base = onVar;
-        figmaData[data.name].on['base-alt'] = onAltVar;
-      } else if (stop.startsWith('plus-')) {
-        const key = stop.replace('plus-', '');
-        figmaData[data.name].plus[key] = bgVar;
-        figmaData[data.name].on.plus[key] = onVar;
-        figmaData[data.name].on.plus[key + '-alt'] = onAltVar;
-      } else if (stop.startsWith('minus-')) {
-        const key = stop.replace('minus-', '');
-        figmaData[data.name].minus[key] = bgVar;
-        figmaData[data.name].on.minus[key] = onVar;
-        figmaData[data.name].on.minus[key + '-alt'] = onAltVar;
+      const bgToken = createColorToken(data.h, data.s, values.bg);
+      const onToken = createColorToken(data.h, data.s, values.on);
+      const onAltToken = createColorToken(data.h, data.s, values.onAlt);
+
+      const { group, key } = parseStopName(stop);
+
+      if (group === 'base') {
+        entry.base = bgToken;
+        entry.on.base = onToken;
+        entry.on['base-alt'] = onAltToken;
+      } else {
+        entry[group][key] = bgToken;
+        entry.on[group][key] = onToken;
+        entry.on[group][key + '-alt'] = onAltToken;
       }
     });
+
+    figmaData[data.name] = entry;
   });
-  
+
   return JSON.stringify(figmaData, null, 2);
 }
 

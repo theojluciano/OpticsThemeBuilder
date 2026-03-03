@@ -121,3 +121,48 @@
   border-color: var(--op-status-danger);
   color: var(--op-text-inverse);
 }
+
+.flashBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-small);
+  padding: var(--op-space-small) var(--op-space-medium);
+  margin-bottom: var(--op-space-large);
+  background: var(--op-status-danger);
+  color: var(--op-text-inverse);
+  border-radius: var(--op-radius-large);
+  font-size: var(--op-font-small);
+  animation: flashSlideIn 0.2s ease-out;
+}
+
+.flashBanner span {
+  flex: 1;
+}
+
+.flashDismiss {
+  background: none;
+  border: none;
+  color: var(--op-text-inverse);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: var(--op-font-medium);
+  opacity: 0.8;
+  transition: opacity var(--op-transition-base);
+}
+
+.flashDismiss:hover {
+  opacity: 1;
+}
+
+@keyframes flashSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.8rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

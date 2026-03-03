@@ -1,13 +1,14 @@
 import { writable } from 'svelte/store';
 import type { OpticsStopName } from '../data/defaults';
-import { 
-  LIGHT_MODE_BG, 
-  DARK_MODE_BG, 
-  LIGHT_MODE_ON, 
-  DARK_MODE_ON, 
-  LIGHT_MODE_ON_ALT, 
-  DARK_MODE_ON_ALT 
+import {
+  LIGHT_MODE_BG,
+  DARK_MODE_BG,
+  LIGHT_MODE_ON,
+  DARK_MODE_ON,
+  LIGHT_MODE_ON_ALT,
+  DARK_MODE_ON_ALT
 } from '../data/defaults';
+import type { ImportResult } from '../utils/import';
 
 export interface ColorTypeConfig {
   id: string;
@@ -221,6 +222,30 @@ function createColorTypesStore() {
     reset: () => setAndSave({
       mode: 'light',
       colorTypes: DEFAULT_COLOR_TYPES
+    }),
+
+    importPalette: (result: ImportResult) => setAndSave({
+      mode: result.mode,
+      colorTypes: result.colorTypes.map(imported => {
+        const builtIn = DEFAULT_COLOR_TYPES.find(
+          d => d.name.toLowerCase() === imported.name.toLowerCase()
+        );
+        return {
+          id: builtIn?.id ?? `custom-${imported.name.toLowerCase().replace(/\s+/g, '-')}`,
+          name: imported.name.charAt(0).toUpperCase() + imported.name.slice(1),
+          enabled: true,
+          isCustom: !builtIn,
+          collapsed: true,
+          h: imported.h,
+          s: imported.s,
+          lightBg:    result.mode === 'light' ? imported.bgValues    : { ...LIGHT_MODE_BG },
+          darkBg:     result.mode === 'dark'  ? imported.bgValues    : { ...DARK_MODE_BG },
+          lightOn:    result.mode === 'light' ? imported.onValues    : { ...LIGHT_MODE_ON },
+          darkOn:     result.mode === 'dark'  ? imported.onValues    : { ...DARK_MODE_ON },
+          lightOnAlt: result.mode === 'light' ? imported.onAltValues : { ...LIGHT_MODE_ON_ALT },
+          darkOnAlt:  result.mode === 'dark'  ? imported.onAltValues : { ...DARK_MODE_ON_ALT },
+        };
+      })
     })
   };
 }

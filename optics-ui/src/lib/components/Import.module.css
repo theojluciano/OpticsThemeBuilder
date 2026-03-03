@@ -1,0 +1,28 @@
+/* Import Component - Optics Design System */
+
+.importButton {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+  padding: 0 var(--op-space-medium);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-large);
+  color: var(--op-text-primary);
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-small);
+  cursor: pointer;
+  transition: all var(--op-transition-base);
+  height: 3.6rem;
+}
+
+.importButton:hover {
+  background: var(--op-color-neutral-minus-five);
+  color: var(--op-color-neutral-on-minus-five);
+  border-color: var(--op-color-neutral-minus-one);
+}
+
+.importButton:active {
+  background: var(--op-surface-active);
+  border-color: var(--op-border-active);
+}

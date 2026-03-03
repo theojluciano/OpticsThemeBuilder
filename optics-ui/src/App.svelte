@@ -3,11 +3,25 @@
   import AddCustomColorType from './lib/components/AddCustomColorType.svelte';
   import FullPagePreview from './lib/components/FullPagePreview.svelte';
   import PreviewButton from './lib/components/PreviewButton.svelte';
+  import Import from './lib/components/Import.svelte';
   import Export from './lib/components/Export.svelte';
   import { colorTypes } from './lib/stores/color-types';
   import styles from './App.module.css';
 
   let isPreviewOpen = false;
+  let flashMessage = '';
+  let flashTimer: ReturnType<typeof setTimeout>;
+
+  function showFlash(message: string) {
+    clearTimeout(flashTimer);
+    flashMessage = message;
+    flashTimer = setTimeout(() => { flashMessage = ''; }, 5000);
+  }
+
+  function dismissFlash() {
+    clearTimeout(flashTimer);
+    flashMessage = '';
+  }
 
   function handleModeChange(mode: 'light' | 'dark') {
     colorTypes.setMode(mode);
@@ -53,6 +67,7 @@
         </div>
         
         <PreviewButton on:click={openPreview} />
+        <Import on:error={(e) => showFlash(e.detail)} />
         <Export />
         
         <button class={styles.resetButton} on:click={handleReset} title="Reset to Defaults" aria-label="Reset to defaults">
@@ -61,6 +76,16 @@
       </div>
     </div>
   </header>
+
+  {#if flashMessage}
+    <div class={styles.flashBanner} role="alert">
+      <i class="ph-bold ph-warning"></i>
+      <span>{flashMessage}</span>
+      <button class={styles.flashDismiss} on:click={dismissFlash} aria-label="Dismiss">
+        <i class="ph-bold ph-x"></i>
+      </button>
+    </div>
+  {/if}
 
   <div class={styles.colorTypesContainer}>
     {#each $colorTypes.colorTypes as colorType (colorType.id)}

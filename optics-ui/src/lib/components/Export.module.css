@@ -23,7 +23,3 @@
 .exportButton:active {
   background: var(--op-interactive-primary-active);
 }
-
-.figmaIcon {
-  flex-shrink: 0;
-}
