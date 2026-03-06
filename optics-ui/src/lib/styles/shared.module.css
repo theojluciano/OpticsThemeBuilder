@@ -10,12 +10,15 @@
   border-radius: var(--op-radius-medium);
   cursor: pointer;
   background: var(--op-surface-base);
-  transition: border-color var(--op-transition-base);
+  transition: border-color var(--op-transition-base), box-shadow var(--op-transition-base), transform var(--op-transition-fast);
   flex-shrink: 0;
+  box-shadow: var(--op-shadow-sm);
 }
 
 .colorInput:hover {
   border-color: var(--op-border-strong);
+  box-shadow: var(--op-shadow-md);
+  transform: scale(1.08);
 }
 
 .colorInput:focus {
@@ -52,6 +55,7 @@
 
 .numberInput:focus {
   border-color: var(--op-border-focus);
+  box-shadow: var(--op-input-focus-primary);
 }
 
 .numberInput::-webkit-inner-spin-button,

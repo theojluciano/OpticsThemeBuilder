@@ -291,6 +291,22 @@ html {
   --op-status-danger: #ef4444;
   --op-status-danger-bg: rgba(239, 68, 68, 0.1);
   
+  /* Surface variants */
+  --op-surface-header: #222;
+
+  /* Toggle track */
+  --op-toggle-track: #444;
+  --op-toggle-track-hover: #555;
+
+  /* Slider track */
+  --op-slider-track: #333;
+
+  /* Text separator */
+  --op-text-separator: #555;
+
+  /* Ghost interactive */
+  --op-interactive-primary-ghost: hsl(217 91% 50% / 0.06);
+
   /* Input heights - Official Optics tokens */
   --op-input-height-small: 2.8rem; /* 28px */
   --op-input-height-medium: 3.6rem; /* 36px */
@@ -347,7 +363,7 @@ html {
   --op-border-width-x-large: 4px;
   
   /* Typography */
-  --op-font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --op-font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --op-font-family-mono: 'Monaco', 'Courier New', monospace;
   
   /* Font sizes - Optics naming convention */
@@ -388,10 +404,11 @@ html {
   /* Transitions */
   --op-transition-input: all 120ms ease-in;
   
-  /* Shadows */
-  --op-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --op-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --op-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* Shadows — tuned for dark backgrounds */
+  --op-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.25), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  --op-shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --op-shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.35), 0 8px 12px -4px rgba(0, 0, 0, 0.2);
+  --op-shadow-hover: 0 6px 16px -4px rgba(0, 0, 0, 0.3), 0 3px 6px -3px rgba(0, 0, 0, 0.2);
   
   /* Transitions */
   --op-transition-fast: 0.15s ease;

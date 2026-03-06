@@ -6,6 +6,7 @@
   border-radius: var(--op-radius-large);
   padding: var(--op-space-large);
   margin-bottom: var(--op-space-large);
+  box-shadow: var(--op-shadow-md);
 }
 
 .title {
@@ -27,19 +28,35 @@
   border-radius: var(--op-radius-large);
   text-align: center;
   border: 1px solid var(--op-border-subtle);
-  transition: border-color var(--op-transition-base);
+  box-shadow: var(--op-shadow-sm);
+  transition: border-color var(--op-transition-base), box-shadow var(--op-transition-base), transform var(--op-transition-fast);
 }
 
 .stat:hover {
   border-color: var(--op-border-default);
+  box-shadow: var(--op-shadow-md);
+  transform: translateY(-2px);
+}
+
+.stat:has(.pass) {
+  border-bottom: 2px solid var(--op-status-success);
+}
+
+.stat:has(.fail) {
+  border-bottom: 2px solid var(--op-status-danger);
+}
+
+.stat:has(.aa) {
+  border-bottom: 2px solid var(--op-status-warning);
 }
 
 .value {
-  font-size: var(--op-font-4x-large);
+  font-size: var(--op-font-5x-large);
   font-weight: var(--op-font-weight-bold);
   margin-bottom: var(--op-space-2x-small);
   color: var(--op-text-primary);
   line-height: var(--op-line-height-tight);
+  letter-spacing: -0.02em;
 }
 
 .value.pass {

@@ -14,4 +14,10 @@ body {
   color: var(--op-text-primary);
   font-family: var(--op-font-family);
   line-height: var(--op-line-height-relaxed);
+  font-feature-settings: 'tnum';
+}
+
+:focus-visible {
+  outline: 2px solid var(--op-border-focus);
+  outline-offset: 2px;
 }

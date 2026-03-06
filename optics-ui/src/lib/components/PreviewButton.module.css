@@ -12,17 +12,22 @@
   font-weight: var(--op-font-weight-normal);
   font-size: var(--op-font-small);
   cursor: pointer;
-  transition: all var(--op-transition-base);
+  transition: all var(--op-transition-base), transform var(--op-transition-fast);
   height: 3.6rem;
+  box-shadow: var(--op-shadow-sm);
 }
 
 .previewButton:hover {
   background: var(--op-color-neutral-minus-five);
   color: var(--op-color-neutral-on-minus-five);
   border-color: var(--op-color-neutral-minus-one);
+  box-shadow: var(--op-shadow-md);
+  transform: translateY(-1px);
 }
 
 .previewButton:active {
   background: var(--op-surface-active);
   border-color: var(--op-border-active);
+  transform: translateY(0);
+  box-shadow: var(--op-shadow-sm);
 }

@@ -12,14 +12,19 @@
   font-weight: var(--op-font-weight-normal);
   font-size: var(--op-font-small);
   cursor: pointer;
-  transition: background var(--op-transition-base);
+  transition: background var(--op-transition-base), box-shadow var(--op-transition-base), transform var(--op-transition-fast);
   height: 3.6rem;
+  box-shadow: var(--op-shadow-sm);
 }
 
 .exportButton:hover {
   background: var(--op-interactive-primary-hover);
+  box-shadow: var(--op-shadow-md);
+  transform: translateY(-1px);
 }
 
 .exportButton:active {
   background: var(--op-interactive-primary-active);
+  transform: translateY(0);
+  box-shadow: var(--op-shadow-sm);
 }
