@@ -74,6 +74,37 @@ describe('exportFigmaJSON', () => {
     expect(base.$value.hex).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
+  it('should nest alert types under an alerts/ group', () => {
+    const json = JSON.parse(exportFigmaJSON([
+      makePalette({ name: 'primary' }),
+      makePalette({ name: 'notice' }),
+      makePalette({ name: 'warning' }),
+      makePalette({ name: 'danger' }),
+      makePalette({ name: 'info' }),
+    ]));
+
+    // Non-alert types stay top-level
+    expect(json.primary).toBeDefined();
+    expect(json.notice).toBeUndefined();
+
+    // Alert types live under alerts/
+    expect(json.alerts).toBeDefined();
+    expect(json.alerts.notice.base).toBeDefined();
+    expect(json.alerts.warning.plus.max).toBeDefined();
+    expect(json.alerts.danger.on.base).toBeDefined();
+    expect(json.alerts.info.minus.one).toBeDefined();
+  });
+
+  it('should keep neutral and secondary top-level (not under alerts)', () => {
+    const json = JSON.parse(exportFigmaJSON([
+      makePalette({ name: 'neutral' }),
+      makePalette({ name: 'secondary' }),
+    ]));
+    expect(json.neutral).toBeDefined();
+    expect(json.secondary).toBeDefined();
+    expect(json.alerts).toBeUndefined();
+  });
+
   it('should populate all plus and minus stops', () => {
     const json = JSON.parse(exportFigmaJSON([makePalette()]));
 

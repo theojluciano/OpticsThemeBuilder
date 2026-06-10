@@ -176,6 +176,22 @@ The Figma export creates **57 variables** per palette:
 
 All variables support both Light and Dark modes in Figma.
 
+#### Variable name grouping
+
+Color types map to Figma variable name-paths (nested JSON objects become `/`-separated
+segments). Most types live at the top level, but the four **alert** types are nested under
+an `alerts/` group to match the Optics "Color Styles" collection convention:
+
+| Type | Variable path |
+|------|---------------|
+| `primary`, `secondary`, `neutral`, custom | `primary/base`, `primary/plus/one`, … |
+| `notice`, `warning`, `danger`, `info` | `alerts/notice/base`, `alerts/danger/plus/one`, … |
+
+This grouping matters when importing the tokens file as a **new mode of an existing
+collection** (rather than a brand-new collection): Figma only writes to variables whose
+name-path already exists, so the paths must match the target collection. Importing as a new
+collection works regardless because Figma creates every variable from scratch.
+
 ### 3. Design Tokens (W3C Format)
 
 Standard Design Tokens format for interoperability:

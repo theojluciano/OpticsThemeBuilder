@@ -13,78 +13,88 @@ import {
 } from './contrast-report-utils';
 
 /**
+ * Color types that the Optics design system groups under an `alerts/` namespace
+ * (i.e. `op-color/alerts/notice/…`). Nesting them keeps the export compatible
+ * with importing as a new *mode* of an existing Optics collection.
+ */
+const ALERT_TYPE_NAMES = ['notice', 'warning', 'danger', 'info'];
+
+/**
  * Export Optics palette to Figma Variables Import format
- * Matches the Design Tokens format that Figma's Variables plugin expects
- * Structure matches Optics format with flat grouping under plus/minus
+ * Matches the Design Tokens format that Figma's Variables plugin expects.
+ * Structure matches Optics format: `base` plus `plus`/`minus`/`on` groups.
+ * Alert palettes (notice/warning/danger/info) are nested under an `alerts/`
+ * group to match the Optics "Color Styles" collection convention.
  * @param palette The Optics palette to export
  * @param mode The mode to export: 'Light' or 'Dark'
  */
 export function exportOpticsToFigma(palette: OpticsPalette, mode: 'Light' | 'Dark' = 'Light'): string {
   const isLightMode = mode === 'Light';
   const collectionName = 'op-color';
-  
-  // Build tokens with flat structure matching Optics format
-  const tokens: any = {
-    [palette.name]: {
+
+  // Alert types live under `alerts/<name>`; everything else stays top-level.
+  const isAlert = ALERT_TYPE_NAMES.includes(palette.name);
+
+  const entry: any = {
+    base: null,
+    plus: {},
+    minus: {},
+    on: {
       base: null,
+      'base-alt': null,
       plus: {},
-      minus: {},
-      on: {
-        base: null,
-        'base-alt': null,
-        plus: {},
-        minus: {}
-      }
+      minus: {}
     }
   };
-  
+
   // Process each stop
   palette.stops.forEach((stop) => {
     const stopName = stop.name;
     const { groupName, varName } = parseStopName(stopName);
-    
+
     // Select the appropriate colors based on mode
     const bgHex = isLightMode ? stop.background.light.hex : stop.background.dark.hex;
     const onHex = isLightMode ? stop.on.light.hex : stop.on.dark.hex;
     const onAltHex = isLightMode ? stop.onAlt.light.hex : stop.onAlt.dark.hex;
-    
+
     // Create variables
     const bgVariable = createColorToken(
       bgHex,
       `${palette.name}-${stop.name}-bg`,
       `var(--op-color-${palette.name}-${stop.name}-bg)`
     );
-    
+
     const onVariable = createColorToken(
       onHex,
       `${palette.name}-${stop.name}-on`,
       `var(--op-color-${palette.name}-${stop.name}-on)`
     );
-    
+
     const onAltVariable = createColorToken(
       onAltHex,
       `${palette.name}-${stop.name}-on-alt`,
       `var(--op-color-${palette.name}-${stop.name}-on-alt)`
     );
-    
+
     // Place background colors
     if (groupName === '') {
-      tokens[palette.name][varName] = bgVariable;
+      entry[varName] = bgVariable;
     } else {
-      tokens[palette.name][groupName][varName] = bgVariable;
+      entry[groupName][varName] = bgVariable;
     }
-    
+
     // Place foreground colors in 'on' group
     if (groupName === '') {
-      tokens[palette.name]['on'][varName] = onVariable;
-      tokens[palette.name]['on'][`${varName}-alt`] = onAltVariable;
+      entry['on'][varName] = onVariable;
+      entry['on'][`${varName}-alt`] = onAltVariable;
     } else {
-      tokens[palette.name]['on'][groupName][varName] = onVariable;
-      tokens[palette.name]['on'][groupName][`${varName}-alt`] = onAltVariable;
+      entry['on'][groupName][varName] = onVariable;
+      entry['on'][groupName][`${varName}-alt`] = onAltVariable;
     }
   });
   
-  // Build the final structure matching actual Figma export format
+  // Build the final structure, nesting alert palettes under an `alerts/` group.
+  const tokens = isAlert ? { alerts: { [palette.name]: entry } } : { [palette.name]: entry };
   const figmaExport = {
     [collectionName]: tokens,
     $extensions: {

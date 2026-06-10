@@ -56,6 +56,20 @@ describe('parseImportJSON', () => {
       expect(result.colorTypes.map(ct => ct.name)).toEqual(['primary', 'neutral', 'danger']);
     });
 
+    it('should flatten the alerts/ group back to color-type names', () => {
+      const palettes = [
+        makePaletteData({ name: 'primary' }),
+        makePaletteData({ name: 'notice', h: 142, s: 76 }),
+        makePaletteData({ name: 'danger', h: 0, s: 84 })
+      ];
+      const json = exportFigmaJSON(palettes);
+      // Sanity: alert types are nested under alerts/ in the exported file
+      expect(JSON.parse(json).alerts.notice).toBeDefined();
+
+      const result = parseImportJSON(json);
+      expect(result.colorTypes.map(ct => ct.name).sort()).toEqual(['danger', 'notice', 'primary']);
+    });
+
     it('should recover hue and saturation from the base stop', () => {
       const palette = makePaletteData({ h: 260, s: 60 });
       const json = exportFigmaJSON([palette]);

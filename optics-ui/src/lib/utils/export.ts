@@ -16,6 +16,14 @@ export interface PaletteData {
 
 const toRgb = converter('rgb');
 
+/**
+ * Color types that the Optics design system groups under an `alerts/` namespace
+ * (i.e. Figma variables named `alerts/notice/…`, `alerts/danger/…`). Nesting them
+ * here lets the exported tokens import cleanly as a new *mode* of an existing
+ * Optics collection, not just as a brand-new collection.
+ */
+export const ALERT_TYPE_NAMES = ['notice', 'warning', 'danger', 'info'];
+
 function createColorToken(h: number, s: number, l: number) {
   const rgb = toRgb({ mode: 'hsl', h, s: s / 100, l: l / 100 })!;
   return {
@@ -82,7 +90,11 @@ export function exportFigmaJSON(palettes: PaletteData[]): string {
       }
     });
 
-    figmaData[data.name] = entry;
+    if (ALERT_TYPE_NAMES.includes(data.name)) {
+      (figmaData.alerts ??= {})[data.name] = entry;
+    } else {
+      figmaData[data.name] = entry;
+    }
   });
 
   return JSON.stringify(figmaData, null, 2);

@@ -36,6 +36,40 @@ function isColorToken(obj: unknown): boolean {
     typeof (obj as Record<string, any>).$value?.hex === 'string';
 }
 
+/**
+ * A color-type entry has the `base`/`plus`/`minus`/`on` shape; a grouping
+ * wrapper (e.g. `alerts`) does not. Used to decide whether to descend one level.
+ */
+function looksLikeColorEntry(obj: unknown): boolean {
+  if (!obj || typeof obj !== 'object') return false;
+  const e = obj as Record<string, any>;
+  return !!(e.base && e.plus && e.minus && e.on);
+}
+
+/**
+ * Flatten the top-level token object into `[name, entry]` pairs. Color-type
+ * entries are kept as-is; grouping wrappers (e.g. `alerts`) are descended one
+ * level, using the child key as the type name (`alerts/notice` → `notice`).
+ */
+function collectColorEntries(data: Record<string, any>): Array<[string, unknown]> {
+  const pairs: Array<[string, unknown]> = [];
+  for (const key of Object.keys(data)) {
+    if (key === '$extensions') continue;
+    const value = data[key];
+    if (looksLikeColorEntry(value)) {
+      pairs.push([key, value]);
+    } else if (value && typeof value === 'object') {
+      for (const childKey of Object.keys(value)) {
+        pairs.push([childKey, (value as Record<string, any>)[childKey]]);
+      }
+    } else {
+      // Not a color entry and not a group object — surface it as an invalid type.
+      pairs.push([key, value]);
+    }
+  }
+  return pairs;
+}
+
 function validateColorEntry(entry: unknown, name: string): asserts entry is Record<string, any> {
   if (!entry || typeof entry !== 'object') {
     throw new Error(`"${name}" is not a valid color type object`);
@@ -100,13 +134,12 @@ export function parseImportJSON(jsonString: string): ImportResult {
   }
   const mode: 'light' | 'dark' = modeName === 'Light' ? 'light' : 'dark';
 
-  const colorTypeNames = Object.keys(data).filter(k => k !== '$extensions');
-  if (colorTypeNames.length === 0) {
+  const entries = collectColorEntries(data);
+  if (entries.length === 0) {
     throw new Error('No color types found in file');
   }
 
-  const colorTypes: ImportedColorType[] = colorTypeNames.map(name => {
-    const entry = data[name];
+  const colorTypes: ImportedColorType[] = entries.map(([name, entry]) => {
     validateColorEntry(entry, name);
 
     try {
