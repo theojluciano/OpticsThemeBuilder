@@ -9,7 +9,13 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 
 ## Recent Updates ✨
 
-**v2.2 - Three-Tier Contrast Indicators (Current)**
+**v2.3 - Figma Mode-Import Compatibility (Current)**
+- 🗂️ **Alert grouping**: the four alert types (`notice`, `warning`, `danger`, `info`) now nest under an `alerts/` group in the export (`alerts/danger/base`, …), matching the Optics "Color Styles" collection convention
+- 🔄 **Mode imports work**: tokens can now be imported as a **new mode of an existing** Optics collection — not just a brand-new collection — without the previous "errors importing tokens" failures
+- ♻️ **Round-trip preserved**: the UI import flattens the `alerts/` group back to plain color-type names, so export → import is lossless
+- 📝 Applied to both the web app and the CLI exporter; see [OPTICS_FORMAT.md](OPTICS_FORMAT.md#variable-name-grouping)
+
+**v2.2 - Three-Tier Contrast Indicators**
 - 🎯 **AAA/AA/Fail System**: Visual indicators now show three levels of WCAG compliance instead of just pass/fail
 - 🟢 **AAA (≥7:1)**: Green indicators for contrast ratios that meet strict AAA standards
 - 🟡 **AA-only (≥4.5:1, <7:1)**: Yellow/amber indicators for ratios that meet AA but not AAA standards
@@ -171,8 +177,8 @@ Each color stop card has three sliders:
 **Export:**
 - Click "Export for Figma" in the header
 - Downloads a single `optics-{mode}.tokens.json` file (e.g., `optics-light.tokens.json`)
-- The file contains all enabled color types with their current mode settings
-- Import the file directly into Figma as Variables
+- The file contains all enabled color types with their current mode settings (alert types — notice/warning/danger/info — are nested under an `alerts/` group)
+- Import the file directly into Figma as Variables — either as a **brand-new collection** or as a **new mode of an existing** Optics collection (the `alerts/` grouping makes the variable name-paths line up with the existing collection)
 
 **Understanding Contrast Indicators:**
 - **Green (AAA)**: Contrast ratio ≥7:1 - meets strict AAA standards, displays "AAA" badge
