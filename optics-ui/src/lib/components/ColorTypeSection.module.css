@@ -127,6 +127,43 @@
   gap: var(--op-space-small);
 }
 
+/* "Match primary" — the seed lock, immediately left of the color inputs. */
+.matchPrimary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--op-space-x-small);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Reserves the switch's width in the sections that don't have one.
+   `visibility: hidden` keeps the box and drops it from the tab order and the
+   accessibility tree. */
+.matchPrimaryPlaceholder {
+  visibility: hidden;
+  cursor: default;
+}
+
+.matchPrimaryLabel {
+  font-size: var(--op-font-small);
+  color: var(--op-text-secondary);
+}
+
+.matchPrimary:hover .matchPrimaryLabel {
+  color: var(--op-text-primary);
+}
+
+/* A locked field still shows its mirrored value, so it reads as inherited
+   rather than broken — dimmed and not-allowed, not hidden. */
+.lockedInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--op-surface-header);
+}
+
 .miniSummary {
   display: flex;
   align-items: center;
@@ -247,6 +284,24 @@
 
 .toggle input:checked:hover + .toggleSlider {
   background-color: var(--op-interactive-primary-hover);
+}
+
+/* Inline variant of the enable/disable switch above, sized to sit in a row of
+   number inputs rather than in the header's right-hand controls. */
+.toggleSmall {
+  width: 32px;
+  height: 18px;
+}
+
+.toggleSmall .toggleSlider:before {
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+}
+
+.toggleSmall input:checked + .toggleSlider:before {
+  transform: translateX(14px);
 }
 
 .content {

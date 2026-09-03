@@ -9,7 +9,14 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 
 ## Recent Updates ✨
 
-**v2.5 - Seed Lightness & State Repair (Current)**
+**v2.6 - Match Primary (Current)**
+- 🔗 **"Match primary" switch on Neutral**: Optics defines `--op-color-neutral-h` and `--op-color-neutral-l` as `var(--op-color-primary-…)`, so neutral tracks primary by default. That link is now a switch in Neutral's header: on, the H and L fields go read-only and mirror primary live; off, neutral's seed is yours and the export pins it as a literal
+- 🎚️ **Only Neutral has it**: it's the only family Optics aliases — locking a hue Optics has no alias for would just export a literal, so the switch isn't offered elsewhere
+- 🎯 **Picking a color releases the lock**: a color chosen from Neutral's swatch carries its own hue, so it switches the match off rather than snapping back
+- 💾 **On by default, including for saved themes**: existing state predates the switch, so it opens locked and neutral adopts primary's hue and lightness on that first load — flip the switch off to take them back (schema v3)
+- 📥 **Imports are taken at their word**: a tokens file states a hue, so importing one only locks Neutral when its seeds already agree with primary's
+
+**v2.5 - Seed Lightness & State Repair**
 - 🔗 **`--op-color-*-l` now emitted**: the color picker's lightness was being discarded. It's now stored per color type and editable via a new **L** input beside H and S. Without it, overriding `-h`/`-s` left `--op-color-*-original` — which Optics uses to color *every* `<a>` — at a hue that was neither yours nor Optics'
 - 🎨 **Custom families get `-original`**: non-Optics scales (`Secondary`, custom types) now emit `-l` and a `-original` declaration, as the Optics Custom Scale template requires
 - 🪢 **Aliased seeds respected**: Optics declares `--op-color-neutral-h: var(--op-color-primary-h)`. The export stays silent while that link holds and pins a literal only once your neutral and primary hues actually disagree — previously a neutral left at Optics' default would have silently inherited your primary hue
@@ -170,6 +177,12 @@ npm install opticsthemebuilder
 - Each color type has independent H (Hue: 0-360°) and S (Saturation: 0-100%) controls in its header
 - Use the color picker for visual selection or type values directly
 - Changes apply to all stops within that color type
+
+**Match Primary (Neutral only):**
+- Neutral's header carries a **Match primary** switch, on by default — it is the Optics default, where `--op-color-neutral-h` and `--op-color-neutral-l` are `var(--op-color-primary-…)`
+- While it's on, Neutral's H and L fields are read-only and follow primary as you move it; S stays yours, since Optics never aliased saturation
+- Turn it off to give Neutral its own hue — the exported CSS then pins `--op-color-neutral-h` / `-l` as literals instead of leaving them to inherit
+- Picking a color from Neutral's swatch turns the switch off for you, and switching it back on re-adopts primary's seeds
 
 **Adding Custom Color Types:**
 - Click "+ Add Custom Color Type" at the bottom

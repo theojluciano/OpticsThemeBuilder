@@ -1,7 +1,7 @@
 <script lang="ts">
   import ColorStopCard from './ColorStopCard.svelte';
   import CopyCssButton from './CopyCssButton.svelte';
-  import { colorTypes } from '../stores/color-types';
+  import { colorTypes, canMatchPrimary } from '../stores/color-types';
   import { OPTICS_STOPS } from '../data/defaults';
   import { makeColor, parseBaseColor } from '../utils/colors';
   import { calculateContrastStats } from '../utils/contrast-stats';
@@ -26,6 +26,12 @@
   // Sync color picker display with HSL values
   $: colorPickerValue = makeColor(hInput, sInput, lInput);
 
+  // Optics aliases neutral's hue and seed lightness to primary's; while the
+  // lock is on, the store mirrors them and both fields are read-only.
+  $: showMatchPrimary = canMatchPrimary(colorType);
+  $: matched = showMatchPrimary && !!colorType.matchPrimary;
+  $: lockedTitle = matched ? 'Locked to primary — turn off "Match primary" to edit' : undefined;
+
   function handleColorPickerChange(e: Event) {
     const target = e.target as HTMLInputElement;
     const result = parseBaseColor(target.value);
@@ -34,8 +40,14 @@
       sInput = Math.round(result.s);
       lInput = Math.round(result.l);
       // One commit: `input` fires continuously while the picker is dragged.
-      colorTypes.updateSeed(colorType.id, { h: hInput, s: sInput, l: lInput });
+      // Picking a color is intent to leave primary behind, so it also releases
+      // the lock — otherwise the chosen hue would snap straight back.
+      colorTypes.updateSeedFromPicker(colorType.id, { h: hInput, s: sInput, l: lInput });
     }
+  }
+
+  function handleMatchPrimary(e: Event) {
+    colorTypes.setMatchPrimary(colorType.id, (e.target as HTMLInputElement).checked);
   }
 
   function clampInput(e: Event, max: number): number {
@@ -144,6 +156,34 @@
       </div>
     </div>
     <div class={styles.colorControls}>
+      {#if showMatchPrimary}
+        <label
+          class={styles.matchPrimary}
+          title="Optics defines --op-color-neutral-h and -l as var(--op-color-primary-…). Leave this on to keep neutral tied to primary."
+        >
+          <span class={`${styles.toggle} ${styles.toggleSmall}`}>
+            <input
+              type="checkbox"
+              checked={matched}
+              on:change={handleMatchPrimary}
+            />
+            <span class={styles.toggleSlider}></span>
+          </span>
+          <span class={styles.matchPrimaryLabel}>Match primary</span>
+        </label>
+      {:else}
+        <!-- The same markup, hidden. Only neutral has the switch, so without a
+             slot of exactly its width every other section's color inputs would
+             sit staggered against neutral's. Copying the markup rather than
+             hardcoding a width keeps the two in step. -->
+        <span class={`${styles.matchPrimary} ${styles.matchPrimaryPlaceholder}`} aria-hidden="true">
+          <span class={`${styles.toggle} ${styles.toggleSmall}`}>
+            <span class={styles.toggleSlider}></span>
+          </span>
+          <span class={styles.matchPrimaryLabel}>Match primary</span>
+        </span>
+      {/if}
+
       <input 
         type="color" 
         class={sharedStyles.colorInput}
@@ -151,14 +191,15 @@
         on:input={handleColorPickerChange}
         title="Choose base color"
       />
-      <label class={sharedStyles.hslLabel}>
+      <label class={sharedStyles.hslLabel} title={lockedTitle}>
         H:
         <input 
           type="number" 
-          class={sharedStyles.numberInput}
+          class={`${sharedStyles.numberInput} ${matched ? styles.lockedInput : ''}`}
           min="0" 
           max="360" 
           value={hInput}
+          disabled={matched}
           on:input={handleHueInput}
         />
       </label>
@@ -173,14 +214,18 @@
           on:input={handleSaturationInput}
         />
       </label>
-      <label class={sharedStyles.hslLabel} title="Lightness of the seed color — sets --op-color-*-l / -original, not a stop on the scale">
+      <label
+        class={sharedStyles.hslLabel}
+        title={lockedTitle ?? 'Lightness of the seed color — sets --op-color-*-l / -original, not a stop on the scale'}
+      >
         L:
         <input 
           type="number" 
-          class={sharedStyles.numberInput}
+          class={`${sharedStyles.numberInput} ${matched ? styles.lockedInput : ''}`}
           min="0" 
           max="100" 
           value={lInput}
+          disabled={matched}
           on:input={handleLightnessInput}
         />
       </label>

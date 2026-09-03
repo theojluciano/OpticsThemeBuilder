@@ -99,7 +99,8 @@ describe('v1 → v2 state migration', () => {
       mode: 'light',
       colorTypes: [v1('Primary', 217, 91), v1('Neutral', 217, 4)]
     });
-    expect(once.version).toBe(2);
+    // Lands on the current schema, having run every step in order.
+    expect(once.version).toBe(3);
 
     // Re-loading migrated state must not touch a now-deliberate primary ramp.
     const deliberate = JSON.parse(JSON.stringify(once));
