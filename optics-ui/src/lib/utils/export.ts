@@ -1,6 +1,7 @@
 import { parse, converter, formatHex } from 'culori';
 import type { OpticsStopName } from '../data/defaults';
 import { OPTICS_STOPS } from '../data/defaults';
+import { ALERT_TYPE_NAMES } from '../data/optics-families';
 
 export interface PaletteData {
   name: string;
@@ -15,14 +16,6 @@ export interface PaletteData {
 }
 
 const toRgb = converter('rgb');
-
-/**
- * Color types that the Optics design system groups under an `alerts/` namespace
- * (i.e. Figma variables named `alerts/notice/…`, `alerts/danger/…`). Nesting them
- * here lets the exported tokens import cleanly as a new *mode* of an existing
- * Optics collection, not just as a brand-new collection.
- */
-export const ALERT_TYPE_NAMES = ['notice', 'warning', 'danger', 'info'];
 
 function createColorToken(h: number, s: number, l: number) {
   const rgb = toRgb({ mode: 'hsl', h, s: s / 100, l: l / 100 })!;

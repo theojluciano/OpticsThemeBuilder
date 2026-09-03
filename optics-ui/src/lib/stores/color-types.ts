@@ -1,16 +1,11 @@
-import { writable } from 'svelte/store';
-import type { OpticsStopName } from '../data/defaults';
-import {
-  LIGHT_MODE_BG,
-  DARK_MODE_BG,
-  LIGHT_MODE_ON,
-  DARK_MODE_ON,
-  LIGHT_MODE_ON_ALT,
-  DARK_MODE_ON_ALT
-} from '../data/defaults';
+import { derived, writable } from 'svelte/store';
+import type { OpticsStopName, StopRamps } from '../data/defaults';
+import { OPTICS_STOPS, RAMP_ROLES, DEFAULT_SEED_LIGHTNESS } from '../data/defaults';
+import { OPTICS_FAMILY_BASELINES, FALLBACK_BASELINE } from '../data/optics-baselines';
+import { opticsFamilyName, familySlug } from '../data/optics-families';
 import type { ImportResult } from '../utils/import';
 
-export interface ColorTypeConfig {
+export interface ColorTypeConfig extends StopRamps {
   id: string;
   name: string;
   enabled: boolean;
@@ -18,79 +13,147 @@ export interface ColorTypeConfig {
   collapsed: boolean;
   h: number;
   s: number;
-  lightBg: Record<OpticsStopName, number>;
-  darkBg: Record<OpticsStopName, number>;
-  lightOn: Record<OpticsStopName, number>;
-  darkOn: Record<OpticsStopName, number>;
-  lightOnAlt: Record<OpticsStopName, number>;
-  darkOnAlt: Record<OpticsStopName, number>;
+  /**
+   * Lightness of the *seed* color, not of any stop. Feeds
+   * `--op-color-{family}-l` / `-original` in the CSS export. Captured from the
+   * color picker; the 19 per-stop sliders are a separate concern.
+   */
+  l: number;
 }
 
 export interface ColorTypesState {
   mode: 'light' | 'dark';
   colorTypes: ColorTypeConfig[];
+  /** Schema version of the persisted state; see `migrateState`. */
+  version?: number;
 }
 
 const STORAGE_KEY = 'optics-theme-builder-state';
 
+/**
+ * 1 → 2: every color type used to be seeded with *primary's* lightness ramp,
+ * and gained a seed `l`. See `migrateState`.
+ */
+const SCHEMA_VERSION = 2;
+
+/** The family's own curve where Optics ships one, primary's otherwise. */
+function baselineFor(name: string) {
+  return OPTICS_FAMILY_BASELINES[opticsFamilyName(name)] ?? FALLBACK_BASELINE;
+}
+
+/** Fresh copies of all six ramps, so edits never write through to the table. */
+function cloneRamps(baseline: StopRamps): StopRamps {
+  return Object.fromEntries(
+    RAMP_ROLES.map(role => [role, { ...baseline[role] }])
+  ) as StopRamps;
+}
+
+type Seed = { h: number; s: number; l?: number };
+
 function createDefaultColorType(
   id: string,
   name: string,
-  h: number,
-  s: number,
+  seed: Seed,
   isCustom: boolean = false
 ): ColorTypeConfig {
+  // Each Optics family ships its own lightness curve — neutral differs from
+  // primary at 43 of its 57 tokens — so seed from that family's real table.
+  const baseline = baselineFor(name);
+
   return {
     id,
     name,
     enabled: true,
     isCustom,
     collapsed: true,
-    h,
-    s,
-    lightBg: { ...LIGHT_MODE_BG },
-    darkBg: { ...DARK_MODE_BG },
-    lightOn: { ...LIGHT_MODE_ON },
-    darkOn: { ...DARK_MODE_ON },
-    lightOnAlt: { ...LIGHT_MODE_ON_ALT },
-    darkOnAlt: { ...DARK_MODE_ON_ALT }
+    h: seed.h,
+    s: seed.s,
+    l: seed.l ?? baseline.l,
+    ...cloneRamps(baseline)
   };
 }
 
 const DEFAULT_COLOR_TYPES: ColorTypeConfig[] = [
-  createDefaultColorType('primary', 'Primary', 217, 91),
-  createDefaultColorType('neutral', 'Neutral', 217, 4),
-  createDefaultColorType('secondary', 'Secondary', 260, 60),
-  createDefaultColorType('notice', 'Notice', 142, 76),
-  createDefaultColorType('warning', 'Warning', 38, 92),
-  createDefaultColorType('danger', 'Danger', 0, 84),
-  createDefaultColorType('info', 'Info', 199, 89),
+  createDefaultColorType('primary', 'Primary', { h: 217, s: 91 }),
+  createDefaultColorType('neutral', 'Neutral', { h: 217, s: 4 }),
+  createDefaultColorType('secondary', 'Secondary', { h: 260, s: 60 }),
+  createDefaultColorType('notice', 'Notice', { h: 142, s: 76 }),
+  createDefaultColorType('warning', 'Warning', { h: 38, s: 92 }),
+  createDefaultColorType('danger', 'Danger', { h: 0, s: 84 }),
+  createDefaultColorType('info', 'Info', { h: 199, s: 89 }),
 ];
 
+/** True when every one of the 57 ramp values matches `baseline` exactly. */
+function rampEquals(colorType: ColorTypeConfig, baseline: StopRamps): boolean {
+  return RAMP_ROLES.every(role =>
+    OPTICS_STOPS.every(stop => colorType[role]?.[stop] === baseline[role][stop])
+  );
+}
+
+/**
+ * Repair state saved by an older schema.
+ *
+ * v1 seeded *every* color type with primary's lightness ramp, so a saved
+ * neutral or alert family carries the wrong curve — and the CSS export then
+ * faithfully reports all 57 of those values as deliberate overrides.
+ *
+ * The repair is deliberately surgical: a family's ramp is replaced only when it
+ * matches primary's ramp *exactly*, which means nobody hand-tuned it (no one
+ * enters 57 values that happen to equal another family's curve). A family with
+ * even one edited stop is left completely alone, so no real work is lost.
+ * Hue and saturation are never touched.
+ */
+function migrateState(state: ColorTypesState): ColorTypesState {
+  if ((state.version ?? 1) >= SCHEMA_VERSION) return state;
+
+  const primaryRamp = OPTICS_FAMILY_BASELINES.primary;
+
+  return {
+    ...state,
+    version: SCHEMA_VERSION,
+    colorTypes: state.colorTypes.map(colorType => {
+      const family = opticsFamilyName(colorType.name);
+      const baseline = OPTICS_FAMILY_BASELINES[family];
+
+      // v1 had no seed lightness; fall back to this family's Optics default.
+      const withSeed = {
+        ...colorType,
+        l: colorType.l ?? baseline?.l ?? DEFAULT_SEED_LIGHTNESS
+      };
+
+      // Only Optics families have a correct ramp to restore, and `primary`'s
+      // own ramp is already right.
+      if (!baseline || family === 'primary') return withSeed;
+      if (!rampEquals(withSeed, primaryRamp)) return withSeed;
+
+      return { ...withSeed, ...cloneRamps(baseline) };
+    })
+  };
+}
+
+function defaultState(): ColorTypesState {
+  return { mode: 'light', colorTypes: DEFAULT_COLOR_TYPES, version: SCHEMA_VERSION };
+}
+
 function loadInitialState(): ColorTypesState {
-  if (typeof window === 'undefined') {
-    return {
-      mode: 'light',
-      colorTypes: DEFAULT_COLOR_TYPES
-    };
-  }
+  if (typeof window === 'undefined') return defaultState();
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.mode && Array.isArray(parsed.colorTypes)) {
-        return parsed;
+        const migrated = migrateState(parsed);
+        // Write the repair back, or every future load redoes it.
+        if (migrated !== parsed) saveState(migrated);
+        return migrated;
       }
     }
   } catch (error) {
     console.warn('Failed to load state from localStorage:', error);
   }
 
-  return {
-    mode: 'light',
-    colorTypes: DEFAULT_COLOR_TYPES
-  };
+  return defaultState();
 }
 
 function saveState(state: ColorTypesState) {
@@ -119,6 +182,34 @@ function createColorTypesStore() {
     saveState(state);
   };
 
+  /**
+   * Merge `patch` into one color type. Every single-type mutation goes through
+   * here, so each one is a single store notification and a single localStorage
+   * write — `<input type="color">` fires `input` continuously while dragging.
+   */
+  const patchColorType = (id: string, patch: Partial<ColorTypeConfig>) =>
+    updateAndSave(state => ({
+      ...state,
+      colorTypes: state.colorTypes.map(ct => (ct.id === id ? { ...ct, ...patch } : ct))
+    }));
+
+  /** Replace one stop in whichever ramp the current mode and role select. */
+  const patchStop = (
+    id: string,
+    role: 'Bg' | 'On' | 'OnAlt',
+    stop: OpticsStopName,
+    value: number
+  ) =>
+    updateAndSave(state => {
+      const ramp = `${state.mode}${role}` as keyof StopRamps;
+      return {
+        ...state,
+        colorTypes: state.colorTypes.map(ct =>
+          ct.id === id ? { ...ct, [ramp]: { ...ct[ramp], [stop]: value } } : ct
+        )
+      };
+    });
+
   return {
     subscribe,
     setMode: (mode: 'light' | 'dark') => 
@@ -131,7 +222,7 @@ function createColorTypesStore() {
           ct.id === id ? { ...ct, enabled: !ct.enabled } : ct
         )
       })),
-    
+
     toggleCollapse: (id: string) =>
       updateAndSave(state => ({
         ...state,
@@ -139,71 +230,29 @@ function createColorTypesStore() {
           ct.id === id ? { ...ct, collapsed: !ct.collapsed } : ct
         )
       })),
-    
-    updateHue: (id: string, h: number) =>
-      updateAndSave(state => ({
-        ...state,
-        colorTypes: state.colorTypes.map(ct =>
-          ct.id === id ? { ...ct, h } : ct
-        )
-      })),
-    
-    updateSaturation: (id: string, s: number) =>
-      updateAndSave(state => ({
-        ...state,
-        colorTypes: state.colorTypes.map(ct =>
-          ct.id === id ? { ...ct, s } : ct
-        )
-      })),
+
+    /** Any combination of the three seed components, committed once. */
+    updateSeed: (id: string, seed: Partial<Seed>) => patchColorType(id, seed),
+
     
     updateBg: (id: string, stop: OpticsStopName, value: number) =>
-      updateAndSave(state => ({
-        ...state,
-        colorTypes: state.colorTypes.map(ct => {
-          if (ct.id !== id) return ct;
-          if (state.mode === 'light') {
-            return { ...ct, lightBg: { ...ct.lightBg, [stop]: value } };
-          } else {
-            return { ...ct, darkBg: { ...ct.darkBg, [stop]: value } };
-          }
-        })
-      })),
-    
+      patchStop(id, 'Bg', stop, value),
+
     updateOn: (id: string, stop: OpticsStopName, value: number) =>
-      updateAndSave(state => ({
-        ...state,
-        colorTypes: state.colorTypes.map(ct => {
-          if (ct.id !== id) return ct;
-          if (state.mode === 'light') {
-            return { ...ct, lightOn: { ...ct.lightOn, [stop]: value } };
-          } else {
-            return { ...ct, darkOn: { ...ct.darkOn, [stop]: value } };
-          }
-        })
-      })),
-    
+      patchStop(id, 'On', stop, value),
+
     updateOnAlt: (id: string, stop: OpticsStopName, value: number) =>
+      patchStop(id, 'OnAlt', stop, value),
+
+    
+    addCustomColorType: (name: string, h: number, s: number, l?: number) =>
       updateAndSave(state => ({
         ...state,
-        colorTypes: state.colorTypes.map(ct => {
-          if (ct.id !== id) return ct;
-          if (state.mode === 'light') {
-            return { ...ct, lightOnAlt: { ...ct.lightOnAlt, [stop]: value } };
-          } else {
-            return { ...ct, darkOnAlt: { ...ct.darkOnAlt, [stop]: value } };
-          }
-        })
+        colorTypes: [
+          ...state.colorTypes,
+          createDefaultColorType(`custom-${Date.now()}`, name, { h, s, l }, true)
+        ]
       })),
-    
-    addCustomColorType: (name: string, h: number, s: number) =>
-      updateAndSave(state => {
-        const id = `custom-${Date.now()}`;
-        const newColorType = createDefaultColorType(id, name, h, s, true);
-        return {
-          ...state,
-          colorTypes: [...state.colorTypes, newColorType]
-        };
-      }),
     
     removeColorType: (id: string) =>
       updateAndSave(state => ({
@@ -211,18 +260,9 @@ function createColorTypesStore() {
         colorTypes: state.colorTypes.filter(ct => ct.id !== id)
       })),
     
-    renameColorType: (id: string, name: string) =>
-      updateAndSave(state => ({
-        ...state,
-        colorTypes: state.colorTypes.map(ct =>
-          ct.id === id ? { ...ct, name } : ct
-        )
-      })),
+    renameColorType: (id: string, name: string) => patchColorType(id, { name }),
     
-    reset: () => setAndSave({
-      mode: 'light',
-      colorTypes: DEFAULT_COLOR_TYPES
-    }),
+    reset: () => setAndSave(defaultState()),
 
     importPalette: (result: ImportResult) => setAndSave({
       mode: result.mode,
@@ -230,24 +270,33 @@ function createColorTypesStore() {
         const builtIn = DEFAULT_COLOR_TYPES.find(
           d => d.name.toLowerCase() === imported.name.toLowerCase()
         );
+        // An export only carries one mode, so the other mode falls back to
+        // defaults — and those must be *this family's* Optics curve, not
+        // primary's. The tokens file has no seed lightness either.
+        const baseline = baselineFor(imported.name);
         return {
-          id: builtIn?.id ?? `custom-${imported.name.toLowerCase().replace(/\s+/g, '-')}`,
+          id: builtIn?.id ?? `custom-${familySlug(imported.name)}`,
           name: imported.name.charAt(0).toUpperCase() + imported.name.slice(1),
           enabled: true,
           isCustom: !builtIn,
           collapsed: true,
           h: imported.h,
           s: imported.s,
-          lightBg:    result.mode === 'light' ? imported.bgValues    : { ...LIGHT_MODE_BG },
-          darkBg:     result.mode === 'dark'  ? imported.bgValues    : { ...DARK_MODE_BG },
-          lightOn:    result.mode === 'light' ? imported.onValues    : { ...LIGHT_MODE_ON },
-          darkOn:     result.mode === 'dark'  ? imported.onValues    : { ...DARK_MODE_ON },
-          lightOnAlt: result.mode === 'light' ? imported.onAltValues : { ...LIGHT_MODE_ON_ALT },
-          darkOnAlt:  result.mode === 'dark'  ? imported.onAltValues : { ...DARK_MODE_ON_ALT },
+          l: baseline.l,
+          ...cloneRamps(baseline),
+          [`${result.mode}Bg`]: imported.bgValues,
+          [`${result.mode}On`]: imported.onValues,
+          [`${result.mode}OnAlt`]: imported.onAltValues,
         };
-      })
+      }),
+      version: SCHEMA_VERSION
     })
   };
 }
 
 export const colorTypes = createColorTypesStore();
+
+/** The color types an export or preview should include. */
+export const enabledColorTypes = derived(colorTypes, state =>
+  state.colorTypes.filter(ct => ct.enabled)
+);

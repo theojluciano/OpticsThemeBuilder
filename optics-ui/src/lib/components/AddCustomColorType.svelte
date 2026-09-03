@@ -1,7 +1,6 @@
 <script lang="ts">
   import { colorTypes } from '../stores/color-types';
-  import { parseBaseColor } from '../utils/colors';
-  import * as culori from 'culori';
+  import { makeColor, parseBaseColor } from '../utils/colors';
   import styles from './AddCustomColorType.module.css';
   import sharedStyles from '../styles/shared.module.css';
 
@@ -10,12 +9,10 @@
   let colorPickerValue = '#3b82f6';
   let hInput = 217;
   let sInput = 91;
+  let lInput = 48;
 
   // Sync color picker display with HSL values
-  $: {
-    const hslColor = culori.hsl({ h: hInput, s: sInput / 100, l: 0.5 });
-    colorPickerValue = culori.formatHex(hslColor);
-  }
+  $: colorPickerValue = makeColor(hInput, sInput, lInput);
 
   function handleColorPickerChange(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -23,6 +20,7 @@
     if (result) {
       hInput = Math.round(result.h);
       sInput = Math.round(result.s);
+      lInput = Math.round(result.l);
     }
   }
 
@@ -30,15 +28,17 @@
     // Clamp values
     hInput = Math.max(0, Math.min(360, hInput));
     sInput = Math.max(0, Math.min(100, sInput));
+    lInput = Math.max(0, Math.min(100, lInput));
   }
 
   function handleAdd() {
     if (customName.trim()) {
-      colorTypes.addCustomColorType(customName.trim(), hInput, sInput);
+      colorTypes.addCustomColorType(customName.trim(), hInput, sInput, lInput);
       // Reset form
       customName = '';
       hInput = 217;
       sInput = 91;
+      lInput = 48;
       isExpanded = false;
     }
   }
@@ -47,6 +47,7 @@
     customName = '';
     hInput = 217;
     sInput = 91;
+    lInput = 48;
     isExpanded = false;
   }
 
@@ -115,6 +116,17 @@
                   min="0" 
                   max="100" 
                   bind:value={sInput}
+                  on:input={handleHSLInput}
+                />
+              </label>
+              <label class={sharedStyles.hslLabel} title="Lightness of the seed color — sets --op-color-*-l / -original, not a stop on the scale">
+                L:
+                <input 
+                  type="number" 
+                  class={sharedStyles.numberInput}
+                  min="0" 
+                  max="100" 
+                  bind:value={lInput}
                   on:input={handleHSLInput}
                 />
               </label>

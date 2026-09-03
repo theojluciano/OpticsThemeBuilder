@@ -9,7 +9,21 @@ Generate accessible color palettes for Figma with automatic foreground color sel
 
 ## Recent Updates ✨
 
-**v2.3 - Figma Mode-Import Compatibility (Current)**
+**v2.5 - Seed Lightness & State Repair (Current)**
+- 🔗 **`--op-color-*-l` now emitted**: the color picker's lightness was being discarded. It's now stored per color type and editable via a new **L** input beside H and S. Without it, overriding `-h`/`-s` left `--op-color-*-original` — which Optics uses to color *every* `<a>` — at a hue that was neither yours nor Optics'
+- 🎨 **Custom families get `-original`**: non-Optics scales (`Secondary`, custom types) now emit `-l` and a `-original` declaration, as the Optics Custom Scale template requires
+- 🪢 **Aliased seeds respected**: Optics declares `--op-color-neutral-h: var(--op-color-primary-h)`. The export stays silent while that link holds and pins a literal only once your neutral and primary hues actually disagree — previously a neutral left at Optics' default would have silently inherited your primary hue
+- 🔧 **Saved state repaired**: state saved before v2.4 seeded every family with primary's ramp. A migration restores each family's real Optics curve — but *only* for families you never edited (a family with one changed stop is left completely alone, and hue/saturation are never touched)
+- 🔁 **Import fixed too**: importing a single-mode tokens file filled the *other* mode with primary's ramp for every family; it now falls back per family
+
+**v2.4 - CSS Variable Export**
+- 📋 **Copy as CSS**: a "Copy CSS" button in the header (all enabled color types) and a copy icon in each color type's header (that type alone) put an Optics theme override stylesheet on your clipboard, ready to paste into a project
+- 🌗 **Both modes in one block**: values are emitted as `light-dark(hsl(var(--op-color-primary-h) var(--op-color-primary-s) 42%), …)` — the same form Optics writes its own tokens in, so light and dark ship together and hue/saturation stay swappable through the two seed variables
+- ✂️ **Only what you changed**: output is a diff against the lightness curves Optics actually ships, so a hue-only tweak is two lines instead of 57
+- 🔍 **Real per-family baselines**: added `optics-baselines.ts` with the genuine per-family Optics tables. Every Optics family has its *own* curve (neutral differs from primary at 43 of 57 tokens), which the builder previously flattened onto the primary curve for all seven types — new color types now seed correctly
+- ℹ️ Non-Optics families (`Secondary`, custom types) get their full scale plus a note that no Optics component reads those variables
+
+**v2.3 - Figma Mode-Import Compatibility**
 - 🗂️ **Alert grouping**: the four alert types (`notice`, `warning`, `danger`, `info`) now nest under an `alerts/` group in the export (`alerts/danger/base`, …), matching the Optics "Color Styles" collection convention
 - 🔄 **Mode imports work**: tokens can now be imported as a **new mode of an existing** Optics collection — not just a brand-new collection — without the previous "errors importing tokens" failures
 - ♻️ **Round-trip preserved**: the UI import flattens the `alerts/` group back to plain color-type names, so export → import is lossless
@@ -108,6 +122,7 @@ node dist/cli.js generate "#3b82f6" --name "primary" --optics
 - ♿ **WCAG Compliant**: Automatically calculates and validates contrast ratios (AA & AAA) with visual pass/fail indicators and per-type summaries
 - 🔄 **Dual Foregrounds**: Provides light and dark foreground options for each background, plus alternative foregrounds
 - 📦 **Unified Figma Export**: Export all enabled color types to a single Figma tokens JSON file per mode (light/dark)
+- 📋 **Optics CSS Export**: Copy a ready-to-paste `theme.css` override block — light and dark together via `light-dark()`, emitting only the values that differ from the Optics defaults
 - 🚀 **CLI & Library**: Use as a command-line tool or import into your Node.js project for automation
 - 🎯 **Smart Color Scaling**: Generates 16 perceptually-distributed color stops from any base color (CLI)
 
@@ -179,6 +194,38 @@ Each color stop card has three sliders:
 - Downloads a single `optics-{mode}.tokens.json` file (e.g., `optics-light.tokens.json`)
 - The file contains all enabled color types with their current mode settings (alert types — notice/warning/danger/info — are nested under an `alerts/` group)
 - Import the file directly into Figma as Variables — either as a **brand-new collection** or as a **new mode of an existing** Optics collection (the `alerts/` grouping makes the variable name-paths line up with the existing collection)
+
+**Copy as CSS:**
+- Click **Copy CSS** in the header to copy every enabled color type, or the copy icon in a single color type's header to copy just that one
+- You get an Optics theme override block. Save it as `theme.css` and load it **after** `optics.css` so it wins the cascade:
+  ```html
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@latest/dist/optics.css">
+  <link rel="stylesheet" href="./theme.css">
+  ```
+- Light and dark ship in the same block, in the form Optics uses for its own tokens:
+  ```css
+  :root {
+    /* Primary */
+    --op-color-primary-h: 217;
+    --op-color-primary-s: 91%;
+    --op-color-primary-l: 60%;
+
+    /* 1 of 57 scale tokens adjusted */
+    --op-color-primary-base: light-dark(
+      hsl(var(--op-color-primary-h) var(--op-color-primary-s) 42%),
+      hsl(var(--op-color-primary-h) var(--op-color-primary-s) 38%)
+    );
+
+    /* Notice */
+    --op-color-alerts-notice-h: 142;
+    --op-color-alerts-notice-s: 76%;
+    /* Scale matches the Optics defaults. */
+  }
+  ```
+  Because the stops reference the `-h`/`-s` seeds, retheming downstream is still a two-variable change. A theme that only moves hue, saturation and lightness comes out as ~20 lines of seeds rather than a regenerated scale.
+- Only values that differ from the Optics defaults are emitted, so the block stays reviewable. A color type that matches Optics exactly is listed in a header comment and omitted.
+- Alert types are written as `--op-color-alerts-danger-*`, matching Optics. `Secondary` and custom types aren't Optics families, so their full scale is emitted with a comment noting that no Optics component reads those variables.
+- The **L** input beside H and S sets `--op-color-*-l`. This is the lightness of your *seed* color, not a stop on the scale (Optics' primary is `l: 48%` while its light `base` is 40%), and it's what builds `--op-color-*-original` — the variable Optics uses to color every `<a>`.
 
 **Understanding Contrast Indicators:**
 - **Green (AAA)**: Contrast ratio ≥7:1 - meets strict AAA standards, displays "AAA" badge

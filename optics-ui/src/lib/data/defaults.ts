@@ -13,6 +13,23 @@ export const OPTICS_STOPS: OpticsStopName[] = [
   'minus-six', 'minus-seven', 'minus-eight', 'minus-max'
 ];
 
+/** The six lightness ramps every color family carries. */
+export const RAMP_ROLES = ['lightBg', 'darkBg', 'lightOn', 'darkOn', 'lightOnAlt', 'darkOnAlt'] as const;
+
+export type RampRole = (typeof RAMP_ROLES)[number];
+
+/** A full set of ramps: six roles x 19 stops. */
+export type StopRamps = Record<RampRole, Record<OpticsStopName, number>>;
+
+/** Optics' primary seed lightness, used wherever a family has no seed of its own. */
+export const DEFAULT_SEED_LIGHTNESS = 48;
+
+/**
+ * Optics' *primary* family lightness curves — the single copy of these values.
+ * `optics-baselines.ts` references them as its `primary` entry, and they double
+ * as the fallback curve for custom color types, which have no Optics family of
+ * their own. Every other Optics family ships a different table.
+ */
 export const LIGHT_MODE_BG: Record<OpticsStopName, number> = {
   'plus-max': 100, 'plus-eight': 98, 'plus-seven': 96, 'plus-six': 94,
   'plus-five': 90, 'plus-four': 84, 'plus-three': 70, 'plus-two': 64,

@@ -5,7 +5,8 @@
   import PreviewButton from './lib/components/PreviewButton.svelte';
   import Import from './lib/components/Import.svelte';
   import Export from './lib/components/Export.svelte';
-  import { colorTypes } from './lib/stores/color-types';
+  import CopyCssButton from './lib/components/CopyCssButton.svelte';
+  import { colorTypes, enabledColorTypes } from './lib/stores/color-types';
   import styles from './App.module.css';
 
   let isPreviewOpen = false;
@@ -68,6 +69,7 @@
         
         <PreviewButton on:click={openPreview} />
         <Import on:error={(e) => showFlash(e.detail)} />
+        <CopyCssButton types={$enabledColorTypes} />
         <Export />
         
         <button class={styles.resetButton} on:click={handleReset} title="Reset to Defaults" aria-label="Reset to defaults">

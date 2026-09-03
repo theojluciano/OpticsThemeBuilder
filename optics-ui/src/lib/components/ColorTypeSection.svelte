@@ -1,11 +1,11 @@
 <script lang="ts">
   import ColorStopCard from './ColorStopCard.svelte';
+  import CopyCssButton from './CopyCssButton.svelte';
   import { colorTypes } from '../stores/color-types';
   import { OPTICS_STOPS } from '../data/defaults';
-  import { parseBaseColor } from '../utils/colors';
+  import { makeColor, parseBaseColor } from '../utils/colors';
   import { calculateContrastStats } from '../utils/contrast-stats';
   import type { ColorTypeConfig } from '../stores/color-types';
-  import * as culori from 'culori';
   import styles from './ColorTypeSection.module.css';
   import sharedStyles from '../styles/shared.module.css';
 
@@ -13,19 +13,18 @@
 
   let hInput = colorType.h;
   let sInput = colorType.s;
+  let lInput = colorType.l;
   let colorPickerValue = '#3b82f6';
 
   // Update local values when colorType changes
   $: {
     hInput = colorType.h;
     sInput = colorType.s;
+    lInput = colorType.l;
   }
 
   // Sync color picker display with HSL values
-  $: {
-    const hslColor = culori.hsl({ h: hInput, s: sInput / 100, l: 0.5 });
-    colorPickerValue = culori.formatHex(hslColor);
-  }
+  $: colorPickerValue = makeColor(hInput, sInput, lInput);
 
   function handleColorPickerChange(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -33,21 +32,29 @@
     if (result) {
       hInput = Math.round(result.h);
       sInput = Math.round(result.s);
-      colorTypes.updateHue(colorType.id, hInput);
-      colorTypes.updateSaturation(colorType.id, sInput);
+      lInput = Math.round(result.l);
+      // One commit: `input` fires continuously while the picker is dragged.
+      colorTypes.updateSeed(colorType.id, { h: hInput, s: sInput, l: lInput });
     }
   }
 
+  function clampInput(e: Event, max: number): number {
+    return Math.max(0, Math.min(max, +(e.target as HTMLInputElement).value));
+  }
+
   function handleHueInput(e: Event) {
-    const target = e.target as HTMLInputElement;
-    hInput = Math.max(0, Math.min(360, +target.value));
-    colorTypes.updateHue(colorType.id, hInput);
+    hInput = clampInput(e, 360);
+    colorTypes.updateSeed(colorType.id, { h: hInput });
   }
 
   function handleSaturationInput(e: Event) {
-    const target = e.target as HTMLInputElement;
-    sInput = Math.max(0, Math.min(100, +target.value));
-    colorTypes.updateSaturation(colorType.id, sInput);
+    sInput = clampInput(e, 100);
+    colorTypes.updateSeed(colorType.id, { s: sInput });
+  }
+
+  function handleLightnessInput(e: Event) {
+    lInput = clampInput(e, 100);
+    colorTypes.updateSeed(colorType.id, { l: lInput });
   }
 
   $: mode = $colorTypes.mode;
@@ -166,6 +173,17 @@
           on:input={handleSaturationInput}
         />
       </label>
+      <label class={sharedStyles.hslLabel} title="Lightness of the seed color — sets --op-color-*-l / -original, not a stop on the scale">
+        L:
+        <input 
+          type="number" 
+          class={sharedStyles.numberInput}
+          min="0" 
+          max="100" 
+          value={lInput}
+          on:input={handleLightnessInput}
+        />
+      </label>
     </div>
     
     <div class={styles.headerRight}>
@@ -176,6 +194,12 @@
         <span class={styles.miniSeparator}>/</span>
         <span class={`${styles.miniValue} ${styles.fail}`}>{stats.fail}</span>
       </div>
+
+      <CopyCssButton
+        compact
+        types={[colorType]}
+        title={`Copy ${colorType.name} CSS variable overrides`}
+      />
 
       <label class={styles.toggle}>
         <input

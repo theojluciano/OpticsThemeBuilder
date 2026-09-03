@@ -44,16 +44,19 @@ export function getContrast(bg: string, fg: string): number {
 /**
  * Parse a color string and return H and S values
  */
-export function parseBaseColor(colorInput: string): { h: number; s: number } | null {
+export function parseBaseColor(colorInput: string): { h: number; s: number; l: number } | null {
   const parsed = culori.parse(colorInput);
   if (!parsed) return null;
   
   const hsl = culori.converter('hsl')(parsed);
   if (!hsl) return null;
   
+  // `l` is the lightness of the *seed* color, not of any stop on the scale.
+  // Optics keeps it as `--op-color-{family}-l` to build `--op-color-{family}-original`.
   return {
     h: hsl.h || 0,
-    s: (hsl.s || 0) * 100
+    s: (hsl.s || 0) * 100,
+    l: (hsl.l ?? 0) * 100
   };
 }
 

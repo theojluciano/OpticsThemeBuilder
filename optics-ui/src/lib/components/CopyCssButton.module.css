@@ -1,0 +1,64 @@
+/* Copy CSS Button - Optics Design System */
+/* Toolbar variant matches Import.module.css / PreviewButton.module.css.
+   Compact variant matches .collapseButton / .deleteButton in ColorTypeSection.module.css. */
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+  padding: 0 var(--op-space-medium);
+  background: var(--op-surface-base);
+  border: 1px solid var(--op-border-default);
+  border-radius: var(--op-radius-large);
+  color: var(--op-text-primary);
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-small);
+  cursor: pointer;
+  transition: all var(--op-transition-base), transform var(--op-transition-fast);
+  height: 3.6rem;
+  box-shadow: var(--op-shadow-sm);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--op-color-neutral-minus-five);
+  color: var(--op-color-neutral-on-minus-five);
+  border-color: var(--op-color-neutral-minus-one);
+  box-shadow: var(--op-shadow-md);
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  background: var(--op-surface-active);
+  border-color: var(--op-border-active);
+  transform: translateY(0);
+  box-shadow: var(--op-shadow-sm);
+}
+
+.button:disabled {
+  opacity: var(--op-opacity-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Icon-only variant that sits inside a ColorTypeSection header */
+.button.compact {
+  justify-content: center;
+  padding: var(--op-space-2x-small);
+  background: transparent;
+  border: none;
+  border-radius: var(--op-radius-medium);
+  box-shadow: none;
+  color: var(--op-text-secondary);
+  font-size: var(--op-font-medium);
+  min-width: 3.2rem;
+  height: 3.2rem;
+  transition: all var(--op-transition-base);
+}
+
+.button.compact:hover:not(:disabled),
+.button.compact:active:not(:disabled) {
+  background: var(--op-surface-base);
+  color: var(--op-text-primary);
+  box-shadow: none;
+  transform: none;
+}

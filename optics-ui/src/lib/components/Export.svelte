@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { colorTypes } from '../stores/color-types';
+  import { colorTypes, enabledColorTypes } from '../stores/color-types';
   import { exportFigmaJSON, downloadFile, type PaletteData } from '../utils/export';
   import { OPTICS_STOPS } from '../data/defaults';
   import type { OpticsStopName } from '../data/defaults';
@@ -7,7 +7,7 @@
 
   function handleExport() {
     const mode = $colorTypes.mode;
-    const enabledTypes = $colorTypes.colorTypes.filter(ct => ct.enabled);
+    const enabledTypes = $enabledColorTypes;
 
     if (enabledTypes.length === 0) {
       alert('Please enable at least one color type to export.');
