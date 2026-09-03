@@ -10,7 +10,14 @@
   box-shadow: var(--op-shadow-sm);
 }
 
-.section.disabled {
+/* Dimmed group by group rather than on `.section` itself: an ancestor's
+   opacity caps its children's, so one rule on the section would drag the
+   switch that turns the scale back on down with it — the one control that has
+   to keep reading as live while the scale is off. */
+.section.disabled .headerLeft,
+.section.disabled .colorControls,
+.section.disabled .miniSummary,
+.section.disabled .content {
   opacity: 0.5;
 }
 
@@ -35,6 +42,7 @@
   gap: var(--op-space-small);
   flex: 1;
   min-width: 0;
+  transition: opacity var(--op-transition-base);
 }
 
 .titleContainer {
@@ -125,6 +133,7 @@
   display: flex;
   align-items: center;
   gap: var(--op-space-small);
+  transition: opacity var(--op-transition-base);
 }
 
 /* "Match primary" — the seed lock, immediately left of the color inputs. */
@@ -171,6 +180,7 @@
   font-size: var(--op-font-small);
   color: var(--op-text-secondary);
   user-select: none;
+  transition: opacity var(--op-transition-base);
 }
 
 .miniValue {
